@@ -1,6 +1,6 @@
 variable "nat_gateway" {
   type = object({
-    name = optional(string)
+    name_prefix = optional(string)
 
     allocation_id     = optional(string)
     connectivity_type = optional(string) # private and public. Defaults to public.
@@ -32,9 +32,9 @@ variable "nat_gateway" {
 locals {
   enable_nat_gateway = var.enable && local.enable_internet_gateway > 0 && var.nat_gateway != null && length(local.public_subnets) > 0 ? 1 : 0
 
-  nat_gateway_name = var.nat_gateway != null ? lookup(
-    var.nat_gateway, "name", null
-  ) != null ? var.nat_gateway.name : "${local.prefix}${module.const.delimiter}${module.const.ngw_suffix}" : null
+  nat_gateway_prefix = var.nat_gateway != null ? lookup(
+    var.nat_gateway, "name_prefix", null
+  ) != null ? var.nat_gateway.name_prefix : local.prefix : null
 }
 
 
@@ -48,7 +48,11 @@ resource "aws_eip" "this" {
   network_border_group = lookup(var.nat_gateway, "network_border_group", null)
 
   tags = merge(local.tags, {
-    Name = "${local.nat_gateway_name}${module.const.delimiter}${module.const.eip_suffix}"
+    Name = join(module.const.delimiter, compact([
+      local.nat_gateway_prefix,
+      module.const.ngw_suffix,
+      module.const.eip_suffix,
+    ]))
   })
 
   dynamic "timeouts" {
@@ -79,13 +83,11 @@ resource "aws_nat_gateway" "this" {
   # поэтому такой "финт ушами" для "протэггивания" ресурса
   provisioner "local-exec" {
     command = <<-COMMAND
-	test '${var.awscli_args}' = 'no' ||
-		aws ${var.awscli_args} ec2 create-tags \
-			--resources ${self.network_interface_id} \
-			--tags  'Key=Name,Value=${local.prefix}${module.const.ngw_suffix}${module.const.delimiter}${module.const.eni_suffix}' \
-				'Key=Environment,Value=${var.env}' \
-				'Key=Terraform,Value=false'
-	COMMAND
+  test '${var.awscli_args}' = 'no' ||
+  	aws ${var.awscli_args} ec2 create-tags \
+  		--resources ${self.network_interface_id} \
+  		--tags  'Key=Name,Value=${join(module.const.delimiter, compact([local.nat_gateway_prefix, module.const.ngw_suffix, module.const.eni_suffix]))}'
+  COMMAND
   }
 
   lifecycle {
@@ -93,7 +95,10 @@ resource "aws_nat_gateway" "this" {
   }
 
   tags = merge(local.tags, {
-    Name = local.nat_gateway_name
+    Name = join(module.const.delimiter, compact([
+      local.nat_gateway_prefix,
+      module.const.ngw_suffix,
+    ]))
   })
 }
 
@@ -102,6 +107,7 @@ resource "random_shuffle" "this" {
   ################################
   count = local.enable_nat_gateway
 
-  input        = [for k, v in aws_subnet.public : v.id]
+  input = [for k, v in aws_subnet.public : v.id]
+
   result_count = 1
 }
