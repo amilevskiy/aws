@@ -77,7 +77,7 @@ resource "aws_vpc_dhcp_options" "this" {
     var.dhcp_options, "netbios_node_type", null
   ) != null ? var.dhcp_options.netbios_node_type > 0 ? var.dhcp_options.netbios_node_type : null : 2
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = local.dhcp_options_name
   })
 }

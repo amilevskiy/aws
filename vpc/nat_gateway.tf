@@ -47,7 +47,7 @@ resource "aws_eip" "this" {
 
   network_border_group = lookup(var.nat_gateway, "network_border_group", null)
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = "${local.nat_gateway_name}${module.const.delimiter}${module.const.eip_suffix}"
   })
 
@@ -92,7 +92,7 @@ resource "aws_nat_gateway" "this" {
     create_before_destroy = true
   }
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = local.nat_gateway_name
   })
 }

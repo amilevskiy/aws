@@ -6,7 +6,7 @@ resource "aws_network_acl" "public" {
   vpc_id     = aws_vpc.this[0].id
   subnet_ids = [for k, v in aws_subnet.public : v.id]
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [lookup(
       var.subnets.public, "name_prefix", null
       ) != null ? var.subnets.public.name_prefix : lookup(
@@ -25,7 +25,7 @@ resource "aws_network_acl_rule" "public_ingess" {
   network_acl_id = aws_network_acl.public[0].id
 
   # egress      = false
-  rule_number = 32766
+  rule_number = module.const.last_rule_number
   rule_action = "allow"
   protocol    = "-1"
   cidr_block  = module.const.cidr_any
@@ -39,7 +39,7 @@ resource "aws_network_acl_rule" "public_egress" {
   network_acl_id = aws_network_acl.public[0].id
 
   egress      = true
-  rule_number = 32766
+  rule_number = module.const.last_rule_number
   rule_action = "allow"
   protocol    = "-1"
   cidr_block  = module.const.cidr_any
@@ -54,7 +54,7 @@ resource "aws_network_acl" "private" {
   vpc_id     = aws_vpc.this[0].id
   subnet_ids = [for k, v in aws_subnet.private : v.id]
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [lookup(
       var.subnets.private, "name_prefix", null
       ) != null ? var.subnets.private.name_prefix : lookup(
@@ -73,7 +73,7 @@ resource "aws_network_acl_rule" "private_ingess" {
   network_acl_id = aws_network_acl.private[0].id
 
   # egress      = false
-  rule_number = 32766
+  rule_number = module.const.last_rule_number
   rule_action = "allow"
   protocol    = "-1"
   cidr_block  = module.const.cidr_any
@@ -87,7 +87,7 @@ resource "aws_network_acl_rule" "private_egress" {
   network_acl_id = aws_network_acl.private[0].id
 
   egress      = true
-  rule_number = 32766
+  rule_number = module.const.last_rule_number
   rule_action = "allow"
   protocol    = "-1"
   cidr_block  = module.const.cidr_any
@@ -102,7 +102,7 @@ resource "aws_network_acl" "secured" {
   vpc_id     = aws_vpc.this[0].id
   subnet_ids = [for k, v in aws_subnet.secured : v.id]
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [lookup(
       var.subnets.secured, "name_prefix", null
       ) != null ? var.subnets.secured.name_prefix : lookup(
@@ -121,7 +121,7 @@ resource "aws_network_acl_rule" "secured_ingess" {
   network_acl_id = aws_network_acl.secured[0].id
 
   # egress      = false
-  rule_number = 32766
+  rule_number = module.const.last_rule_number
   rule_action = "allow"
   protocol    = "-1"
   cidr_block  = aws_vpc.this[0].cidr_block
@@ -135,7 +135,7 @@ resource "aws_network_acl_rule" "secured_egress" {
   network_acl_id = aws_network_acl.secured[0].id
 
   egress      = true
-  rule_number = 32766
+  rule_number = module.const.last_rule_number
   rule_action = "allow"
   protocol    = "-1"
   cidr_block  = aws_vpc.this[0].cidr_block

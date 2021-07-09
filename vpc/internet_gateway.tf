@@ -25,7 +25,7 @@ resource "aws_internet_gateway" "this" {
     create_before_destroy = true
   }
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = local.internet_gateway_name
   })
 }

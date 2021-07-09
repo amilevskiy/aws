@@ -204,7 +204,7 @@ resource "aws_subnet" "public" {
   #var.subnets.public.name_prefix is null
   #- try(var.subnets.public.name_prefix, var.subnets.name_prefix, local.prefix),
   #- can(var.subnets.public.name_prefix) ? var.subnets.public.name_prefix : local.prefix,
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [lookup(
       var.subnets.public, "name_prefix", null
       ) != null ? var.subnets.public.name_prefix : lookup(
@@ -274,7 +274,7 @@ resource "aws_subnet" "private" {
     var.subnets, "outpost_arn", null
   ) != null ? var.subnets.outpost_arn : null
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [lookup(
       var.subnets.private, "name_prefix", null
       ) != null ? var.subnets.private.name_prefix : lookup(
@@ -344,7 +344,7 @@ resource "aws_subnet" "secured" {
     var.subnets, "outpost_arn", null
   ) != null ? var.subnets.outpost_arn : null
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [lookup(
       var.subnets.secured, "name_prefix", null
       ) != null ? var.subnets.secured.name_prefix : lookup(

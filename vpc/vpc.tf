@@ -47,7 +47,7 @@ resource "aws_vpc" "this" {
   enable_classiclink_dns_support   = lookup(var.vpc, "enable_classiclink_dns_support", null)
   assign_generated_ipv6_cidr_block = lookup(var.vpc, "assign_generated_ipv6_cidr_block", null)
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = local.vpc_name
   })
 }

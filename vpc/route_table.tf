@@ -11,7 +11,7 @@ resource "aws_route_table" "public" {
     var.subnets, "propagating_vgws", null
   ) != null ? var.subnets.propagating_vgws : null
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [lookup(
       var.subnets.public, "name_prefix", null
       ) != null ? var.subnets.public.name_prefix : lookup(
@@ -54,7 +54,7 @@ resource "aws_route_table" "private" {
     var.subnets.private, "propagating_vgws", null
   ) != null ? var.subnets.private.propagating_vgws : null
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [lookup(
       var.subnets.private, "name_prefix", null
       ) != null ? var.subnets.private.name_prefix : lookup(
@@ -98,7 +98,7 @@ resource "aws_route_table" "secured" {
     var.subnets, "propagating_vgws", null
   ) != null ? var.subnets.propagating_vgws : null
 
-  tags = merge(var.tags, {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [lookup(
       var.subnets.secured, "name_prefix", null
       ) != null ? var.subnets.secured.name_prefix : lookup(

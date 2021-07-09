@@ -51,3 +51,9 @@ output "availability_zone_ids" {
   ##############################
   value = try(var.subnets.availability_zone_ids, null)
 }
+
+#################
+output "length" {
+  ###############
+  value = join(" ", [local.public_length, local.private_length, local.secured_length])
+}

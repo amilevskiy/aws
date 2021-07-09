@@ -7,13 +7,13 @@ resource "aws_default_vpc_dhcp_options" "this" {
 
   netbios_node_type = 2
 
-  tags = {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [
       module.const.prefix,
       var.default_label,
       module.const.dhcp_options_suffix,
     ])
-  }
+  })
 }
 
 #https://www.terraform.io/docs/providers/aws/r/default_route_table.html
@@ -26,13 +26,13 @@ resource "aws_default_route_table" "this" {
   #must!
   route = []
 
-  tags = {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [
       local.prefix,
       var.default_label,
       module.const.rtb_suffix,
     ])
-  }
+  })
 }
 
 #https://www.terraform.io/docs/providers/aws/r/default_network_acl.html
@@ -60,13 +60,13 @@ resource "aws_default_network_acl" "this" {
     to_port    = 0
   }
 
-  tags = {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [
       local.prefix,
       var.default_label,
       module.const.acl_suffix,
     ])
-  }
+  })
 
   lifecycle {
     ignore_changes = [subnet_ids]
@@ -80,11 +80,11 @@ resource "aws_default_security_group" "this" {
 
   vpc_id = aws_vpc.this[0].id
 
-  tags = {
+  tags = merge(local.tags, {
     Name = join(module.const.delimiter, [
       local.prefix,
       var.default_label,
       module.const.sg_suffix,
     ])
-  }
+  })
 }

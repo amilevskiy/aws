@@ -16,12 +16,9 @@ locals {
     var.name,
   ]))
 
-  tags = var.enable ? merge({
-    Environment = var.env != "" ? var.env : null
-    Terraform   = "true"
-  }, var.tags) : {}
-
-  # dhcp_domain_name = lower(replace(
-  #   var.dhcp_domain_name, module.const.regexp_tail_dots, ""
-  # ))
+  # tags = var.enable ? merge({
+  #   Environment = var.env != "" ? var.env : null
+  #   Terraform   = "true"
+  # }, var.tags) : {}
+  tags = var.tags
 }
