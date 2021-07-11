@@ -30,7 +30,8 @@ variable "nat_gateway" {
 
 
 locals {
-  enable_nat_gateway = var.enable && local.enable_internet_gateway > 0 && var.nat_gateway != null && length(local.public_subnets) > 0 ? 1 : 0
+  #enable_nat_gateway = var.enable && local.enable_internet_gateway > 0 && var.nat_gateway != null && length(local.public_subnets) > 0 ? 1 : 0
+  enable_nat_gateway = var.enable && local.enable_internet_gateway > 0 && var.nat_gateway != null ? length(local.public_subnets) > 0 ? 1 : 0 : 0
 
   nat_gateway_prefix = var.nat_gateway != null ? lookup(
     var.nat_gateway, "name_prefix", null

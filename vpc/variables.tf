@@ -1,5 +1,5 @@
 variable "enable" {
-  default     = true
+  default     = false
   description = "(Optional) Destroy all module resources if false"
 }
 
