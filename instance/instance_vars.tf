@@ -61,7 +61,9 @@ variable "instance" {
     instance_type                        = string
     ipv6_address_count                   = optional(number)
     ipv6_addresses                       = optional(list(string))
-    key_name                             = optional(string)
+
+    key_name   = optional(string)
+    public_key = optional(string)
 
     metadata_options = optional(object({
       http_endpoint               = optional(string) # enabled or disabled

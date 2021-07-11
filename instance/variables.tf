@@ -208,18 +208,3 @@ variable "ec2_price" {
 
   description = "The map of on-demand prices."
 }
-
-variable "public_key" {
-  default     = ""
-  description = "The public key for aws_key_pair (optional)."
-}
-
-variable "iam_inline_policy_document" {
-  default     = ""
-  description = "The JSON inline policy (optional)."
-}
-
-variable "iam_policy_arns" {
-  default     = []
-  description = "The list of ARN of attached policies (optional)."
-}

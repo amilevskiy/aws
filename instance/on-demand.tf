@@ -67,15 +67,22 @@ resource "aws_instance" "this" {
     }
   }
 
-  get_password_data                    = lookup(var.instance, "get_password_data", null)
-  hibernation                          = lookup(var.instance, "hibernation", null)
-  host_id                              = lookup(var.instance, "host_id", null)
-  iam_instance_profile                 = lookup(var.instance, "iam_instance_profile", null)
+  get_password_data = lookup(var.instance, "get_password_data", null)
+  hibernation       = lookup(var.instance, "hibernation", null)
+  host_id           = lookup(var.instance, "host_id", null)
+
+  iam_instance_profile = local.enable_iam > 0 ? aws_iam_instance_profile.this[0].name : lookup(
+    var.instance, "iam_instance_profile", null
+  )
+
   instance_initiated_shutdown_behavior = lookup(var.instance, "instance_initiated_shutdown_behavior", null)
   instance_type                        = var.instance.instance_type
   ipv6_address_count                   = lookup(var.instance, "ipv6_address_count", null)
   ipv6_addresses                       = lookup(var.instance, "ipv6_addresses", null)
-  key_name                             = lookup(var.instance, "key_name", null)
+
+  key_name = local.enable_key_pair > 0 ? aws_key_pair.this[0].id : lookup(
+    var.instance, "key_name", null
+  )
 
   dynamic "metadata_options" {
     for_each = lookup(var.instance, "metadata_options", null) == null ? [] : [var.instance.metadata_options]
@@ -109,15 +116,21 @@ resource "aws_instance" "this" {
     }
   }
 
-  secondary_private_ips  = lookup(var.instance, "secondary_private_ips", null)
-  security_groups        = lookup(var.instance, "security_groups", null)
-  source_dest_check      = lookup(var.instance, "source_dest_check", null)
-  subnet_id              = lookup(var.instance, "subnet_id", null)
-  tenancy                = lookup(var.instance, "tenancy", null)
-  user_data              = lookup(var.instance, "user_data", null)
-  user_data_base64       = lookup(var.instance, "user_data_base64", null)
-  volume_tags            = lookup(var.instance, "volume_tags", null)
-  vpc_security_group_ids = lookup(var.instance, "vpc_security_group_ids", null)
+  secondary_private_ips = lookup(var.instance, "secondary_private_ips", null)
+  security_groups       = lookup(var.instance, "security_groups", null)
+  source_dest_check     = lookup(var.instance, "source_dest_check", null)
+  subnet_id             = lookup(var.instance, "subnet_id", null)
+  tenancy               = lookup(var.instance, "tenancy", null)
+  user_data             = lookup(var.instance, "user_data", null)
+  user_data_base64      = lookup(var.instance, "user_data_base64", null)
+
+  volume_tags = lookup(
+    var.instance, "volume_tags", null
+    ) != null ? var.instance.volume_tags : {
+    Name = "${local.instance_name}${module.const.delimiter}${module.const.root_ebs_suffix}"
+  }
+
+  vpc_security_group_ids = lookup(var.instance, "vpc_security_group_ids", null) != null ? var.instance.vpc_security_group_ids : aws_security_group.this.*.id
 
   tags = {
     Name = local.instance_name
