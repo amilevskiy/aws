@@ -1,6 +1,6 @@
 variable "iam" {
   type = object({
-    name_infix = optional(string)
+    name = optional(string)
 
     inline_policy_document = optional(string)
 
@@ -16,9 +16,9 @@ locals {
     var.instance, "iam_instance_profile", null
   ) != null ? 0 : 1 : 1 : 0
 
-  iam_name_infix = local.enable_iam > 0 && var.iam != null ? lookup(
-    var.iam, "name_infix", null
-  ) != null ? var.iam.name_infix : local.instance_name : null
+  iam_name = local.enable_iam > 0 && var.iam != null ? lookup(
+    var.iam, "name", null
+  ) != null ? var.iam.name : local.instance_name : null
 
   iam_inline_policy_document = local.enable_iam > 0 && var.iam != null ? lookup(
     var.iam, "inline_policy_document", null
@@ -54,7 +54,7 @@ resource "aws_iam_role" "this" {
 
   name_prefix = "${join(module.const.delimiter, [
     "iamRole",
-    local.iam_name_infix,
+    local.iam_name,
   ])}${module.const.delimiter}"
 
   description = "Allows access to AWS resources for ${local.instance_name}-instance"
@@ -66,7 +66,7 @@ resource "aws_iam_role" "this" {
   }
 
   tags = {
-    Name = "${local.iam_name_infix}${module.const.delimiter}${module.const.iam_role_suffix}"
+    Name = "${local.iam_name}${module.const.delimiter}${module.const.iam_role_suffix}"
   }
 }
 
@@ -78,7 +78,7 @@ resource "aws_iam_role_policy" "this" {
 
   name_prefix = "${join(module.const.delimiter, [
     "iamInlinePolicy",
-    local.iam_name_infix,
+    local.iam_name,
   ])}${module.const.delimiter}"
 
   role = aws_iam_role.this[0].name
@@ -109,7 +109,7 @@ resource "aws_iam_instance_profile" "this" {
 
   name_prefix = "${join(module.const.delimiter, [
     "iamInstanceProfile",
-    local.iam_name_infix,
+    local.iam_name,
   ])}${module.const.delimiter}"
 
   role = aws_iam_role.this[0].name
@@ -119,7 +119,7 @@ resource "aws_iam_instance_profile" "this" {
   }
 
   tags = {
-    Name = "${local.iam_name_infix}${module.const.delimiter}${module.const.iam_instance_profile_suffix}"
+    Name = "${local.iam_name}${module.const.delimiter}${module.const.iam_instance_profile_suffix}"
   }
 }
 

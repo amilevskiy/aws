@@ -43,7 +43,6 @@ locals {
         "egress $1 $2 $3 $4"
       ), "/[ *]+$/", "") => split(" ", replace(v, "/\\s+/", " "))
   } : {}) : {}
-
 }
 
 #https://www.terraform.io/docs/providers/aws/r/security_group.html
@@ -52,7 +51,9 @@ resource "aws_security_group" "this" {
   count = local.enable_sg
 
   name_prefix = "${local.security_group_name}${module.const.delimiter}"
-  description = lookup(var.security_group, "description", "Traffic for ${local.instance_name}")
+  description = lookup(
+    var.security_group, "description", null
+  ) != null ? var.security_group.description : "Traffic for ${local.instance_name}"
 
   vpc_id = lookup(var.security_group, "vpc_id", null)
 

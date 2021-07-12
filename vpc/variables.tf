@@ -41,9 +41,19 @@ variable "public_label" {
   description = "The label for public subnets and route tables"
 }
 
-variable "private_label" {
-  default     = "private"
-  description = "The label for private subnets and route tables"
+variable "lb_label" {
+  default     = "lb"
+  description = "The label for lb subnets and route tables"
+}
+
+variable "k8s_label" {
+  default     = "k8s"
+  description = "The label for k8s subnets and route tables"
+}
+
+variable "misc_label" {
+  default     = "misc"
+  description = "The label for miscellaneous subnets and route tables"
 }
 
 variable "secured_label" {

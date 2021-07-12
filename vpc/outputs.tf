@@ -28,10 +28,22 @@ output "public_subnets" {
   value = try(aws_subnet.public, null)
 }
 
-##########################
-output "private_subnets" {
-  ########################
-  value = try(aws_subnet.private, null)
+#####################
+output "lb_subnets" {
+  ###################
+  value = try(aws_subnet.lb, null)
+}
+
+######################
+output "k8s_subnets" {
+  ####################
+  value = try(aws_subnet.k8s, null)
+}
+
+#######################
+output "misc_subnets" {
+  #####################
+  value = try(aws_subnet.misc, null)
 }
 
 ##########################
@@ -55,5 +67,7 @@ output "availability_zone_ids" {
 #################
 output "length" {
   ###############
-  value = join(" ", [local.public_length, local.private_length, local.secured_length])
+  value = join(" ", [
+    local.public_length, local.lb_length, local.k8s_length, local.misc_length, local.secured_length
+  ])
 }
