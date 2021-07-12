@@ -18,8 +18,8 @@ resource "aws_network_acl" "public" {
 }
 
 #https://www.terraform.io/docs/providers/aws/r/network_acl_rule.html
-resource "aws_network_acl_rule" "public_ingess" {
-  ###############################################
+resource "aws_network_acl_rule" "public_ingress" {
+  ################################################
   count = length(local.public_subnets) > 0 ? 1 : 0
 
   network_acl_id = aws_network_acl.public[0].id
@@ -66,8 +66,8 @@ resource "aws_network_acl" "private" {
 }
 
 #https://www.terraform.io/docs/providers/aws/r/network_acl_rule.html
-resource "aws_network_acl_rule" "private_ingess" {
-  ################################################
+resource "aws_network_acl_rule" "private_ingress" {
+  #################################################
   count = length(local.private_subnets) > 0 ? 1 : 0
 
   network_acl_id = aws_network_acl.private[0].id
@@ -114,8 +114,8 @@ resource "aws_network_acl" "secured" {
 }
 
 #https://www.terraform.io/docs/providers/aws/r/network_acl_rule.html
-resource "aws_network_acl_rule" "secured_ingess" {
-  ################################################
+resource "aws_network_acl_rule" "secured_ingress" {
+  #################################################
   count = length(local.secured_subnets) > 0 ? 1 : 0
 
   network_acl_id = aws_network_acl.secured[0].id
