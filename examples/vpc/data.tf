@@ -1,3 +1,18 @@
+#https://www.terraform.io/docs/providers/aws/d/availability_zones.html
+data "aws_availability_zones" "available" {
+  #########################################
+  count = local.enable
+
+  state = "available"
+}
+
+locals {
+  availability_zones = try(zipmap(
+    flatten(data.aws_availability_zones.available.*.names),
+    flatten(data.aws_availability_zones.available.*.zone_ids)
+  ), {})
+}
+
 #https://www.terraform.io/docs/configuration/locals.html
 locals {
   ######
