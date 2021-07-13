@@ -1,77 +1,54 @@
 #https://www.terraform.io/docs/providers/aws/r/route_table.html
-resource "aws_route_table" "public" {
-  ###################################
-  count = length(local.public_subnets) > 0 ? 1 : 0
+resource "aws_route_table" "this" {
+  #################################
+  for_each = toset(local.subnets_order)
 
   vpc_id = aws_vpc.this[0].id
 
-  propagating_vgws = lookup(
-    var.subnets.public, "propagating_vgws", null
-    ) != null ? var.subnets.public.propagating_vgws : lookup(
-    var.subnets, "propagating_vgws", null
-  ) != null ? var.subnets.propagating_vgws : null
+  propagating_vgws = var.subnets[each.key].propagating_vgws != null ? (
+    var.subnets[each.key].propagating_vgws
+  ) : var.subnets.propagating_vgws
 
   tags = merge(local.tags, {
-    Name = join(module.const.delimiter, [lookup(
-      var.subnets.public, "name_prefix", null
-      ) != null ? var.subnets.public.name_prefix : lookup(
-      var.subnets, "name_prefix", null
-      ) != null ? var.subnets.name_prefix : "${local.prefix}${module.const.delimiter}${var.public_label}",
+    Name = join(module.const.delimiter, [var.subnets[each.key].name_prefix != null ? (
+      var.subnets[each.key].name_prefix
+      ) : var.subnets.name_prefix != null ? var.subnets.name_prefix : join(module.const.delimiter, [
+        local.prefix,
+        var.label[each.key]
+      ]),
       module.const.rtb_suffix,
     ])
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/r/route.html
-resource "aws_route" "public_default" {
-  #####################################
-  count = local.enable_internet_gateway > 0 && length(local.public_subnets) > 0 ? 1 : 0
+#https://www.terraform.io/docs/providers/aws/r/route_table_association.html
+resource "aws_route_table_association" "this" {
+  #############################################
+  for_each = aws_subnet.this
 
-  route_table_id         = aws_route_table.public[0].id
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.this[replace(each.key, "/-.*/", "")].id
+}
+
+
+#https://www.terraform.io/docs/providers/aws/r/route.html
+resource "aws_route" "public-default" {
+  #####################################
+  count = local.enable_internet_gateway > 0 && contains(local.subnets_order, "public") ? 1 : 0
+
+  route_table_id         = aws_route_table.this["public"].id
   destination_cidr_block = module.const.cidr_any
   gateway_id             = aws_internet_gateway.this[0].id
 }
 
+#https://www.terraform.io/docs/providers/aws/r/route.html
+resource "aws_route" "private-default" {
+  ######################################
+  for_each = toset(local.enable_nat_gateway > 0 ? [
+    for v in local.subnets_order : v if !contains(["public", "secured"], v)
+  ] : [])
 
-#https://www.terraform.io/docs/providers/aws/r/route_table_association.html
-resource "aws_route_table_association" "public" {
-  ###############################################
-  for_each = aws_subnet.public
-
-  subnet_id      = each.value.id
-  route_table_id = aws_route_table.public[0].id
-}
-
-
-#https://www.terraform.io/docs/providers/aws/r/route_table.html
-resource "aws_route_table" "secured" {
-  ####################################
-  count = length(local.secured_subnets) > 0 ? 1 : 0
-
-  vpc_id = aws_vpc.this[0].id
-
-  propagating_vgws = lookup(
-    var.subnets.secured, "propagating_vgws", null
-    ) != null ? var.subnets.secured.propagating_vgws : lookup(
-    var.subnets, "propagating_vgws", null
-  ) != null ? var.subnets.propagating_vgws : null
-
-  tags = merge(local.tags, {
-    Name = join(module.const.delimiter, [lookup(
-      var.subnets.secured, "name_prefix", null
-      ) != null ? var.subnets.secured.name_prefix : lookup(
-      var.subnets, "name_prefix", null
-      ) != null ? var.subnets.name_prefix : "${local.prefix}${module.const.delimiter}${var.secured_label}",
-      module.const.rtb_suffix,
-    ])
-  })
-}
-
-#https://www.terraform.io/docs/providers/aws/r/route_table_association.html
-resource "aws_route_table_association" "secured" {
-  ################################################
-  for_each = aws_subnet.secured
-
-  subnet_id      = each.value.id
-  route_table_id = aws_route_table.secured[0].id
+  route_table_id         = aws_route_table.this[each.key].id
+  destination_cidr_block = module.const.cidr_any
+  nat_gateway_id         = aws_nat_gateway.this[0].id
 }

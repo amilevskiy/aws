@@ -12,12 +12,11 @@ variable "vpc" {
   })
 
   validation {
-    condition = var.vpc != null ? lookup(
-      var.vpc, "instance_tenancy", null
-      ) != null ? can(regex(
+    condition = var.vpc != null ? (
+      var.vpc.instance_tenancy != null ? can(regex(
         "^(?i)(default|dedicated|host)$",
         var.vpc.instance_tenancy
-    )) : true : true
+    )) : true) : true
 
     error_message = "The only possible values are \"default\", \"dedicated\" and \"host\"."
   }
@@ -29,9 +28,10 @@ locals {
   enable_vpc = var.enable && var.vpc != null ? 1 : 0
 
   #!! doesn't work: try(var.vpc.name, "${local.prefix}${module.const.vpc_suffix}")
-  vpc_name = var.vpc != null ? lookup(
-    var.vpc, "name", null
-  ) != null ? var.vpc.name : "${local.prefix}${module.const.delimiter}${module.const.vpc_suffix}" : null
+  vpc_name = var.vpc != null ? (var.vpc.name != null
+    ? var.vpc.name
+    : "${local.prefix}${module.const.delimiter}${module.const.vpc_suffix}"
+  ) : null
 }
 
 #https://www.terraform.io/docs/providers/aws/r/vpc.html
@@ -40,12 +40,12 @@ resource "aws_vpc" "this" {
   count = local.enable_vpc
 
   cidr_block                       = var.vpc.cidr_block
-  instance_tenancy                 = lookup(var.vpc, "instance_tenancy", null)
-  enable_dns_support               = lookup(var.vpc, "enable_dns_support", null)
-  enable_dns_hostnames             = lookup(var.vpc, "enable_dns_hostnames", null)
-  enable_classiclink               = lookup(var.vpc, "enable_classiclink", null)
-  enable_classiclink_dns_support   = lookup(var.vpc, "enable_classiclink_dns_support", null)
-  assign_generated_ipv6_cidr_block = lookup(var.vpc, "assign_generated_ipv6_cidr_block", null)
+  instance_tenancy                 = var.vpc.instance_tenancy
+  enable_dns_support               = var.vpc.enable_dns_support
+  enable_dns_hostnames             = var.vpc.enable_dns_hostnames
+  enable_classiclink               = var.vpc.enable_classiclink
+  enable_classiclink_dns_support   = var.vpc.enable_classiclink_dns_support
+  assign_generated_ipv6_cidr_block = var.vpc.assign_generated_ipv6_cidr_block
 
   tags = merge(local.tags, {
     Name = local.vpc_name

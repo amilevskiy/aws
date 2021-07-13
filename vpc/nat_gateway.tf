@@ -15,12 +15,11 @@ variable "nat_gateway" {
   })
 
   validation {
-    condition = var.nat_gateway != null ? lookup(
-      var.nat_gateway, "connectivity_type", null
-      ) != null ? can(regex(
+    condition = var.nat_gateway != null ? (
+      var.nat_gateway.connectivity_type != null ? can(regex(
         "^(?i)(private|public)$",
         var.nat_gateway.connectivity_type
-    )) : true : true
+    )) : true) : true
 
     error_message = "The only possible values are \"private\" and \"public\"."
   }
@@ -30,12 +29,11 @@ variable "nat_gateway" {
 
 
 locals {
-  #enable_nat_gateway = var.enable && local.enable_internet_gateway > 0 && var.nat_gateway != null && length(local.public_subnets) > 0 ? 1 : 0
-  enable_nat_gateway = var.enable && local.enable_internet_gateway > 0 && var.nat_gateway != null ? length(local.public_subnets) > 0 ? 1 : 0 : 0
+  enable_nat_gateway = local.enable_internet_gateway > 0 && local.enable_subnets && var.nat_gateway != null ? var.subnets.public != null ? 1 : 0 : 0
 
-  nat_gateway_prefix = var.nat_gateway != null ? lookup(
-    var.nat_gateway, "name_prefix", null
-  ) != null ? var.nat_gateway.name_prefix : local.prefix : null
+  nat_gateway_prefix = var.nat_gateway != null ? (
+    var.nat_gateway.name_prefix != null ? var.nat_gateway.name_prefix : local.prefix
+  ) : null
 }
 
 
@@ -46,7 +44,7 @@ resource "aws_eip" "this" {
 
   vpc = true
 
-  network_border_group = lookup(var.nat_gateway, "network_border_group", null)
+  network_border_group = var.nat_gateway.network_border_group
 
   tags = merge(local.tags, {
     Name = join(module.const.delimiter, compact([
@@ -57,11 +55,11 @@ resource "aws_eip" "this" {
   })
 
   dynamic "timeouts" {
-    for_each = lookup(var.nat_gateway, "timeouts", null) == null ? [] : [var.nat_gateway.timeouts]
+    for_each = var.nat_gateway.timeouts != null ? [var.nat_gateway.timeouts] : []
     content {
-      read   = lookup(timeouts.value, "read", null)
-      update = lookup(timeouts.value, "update", null)
-      delete = lookup(timeouts.value, "delete", null)
+      read   = timeouts.value.read
+      update = timeouts.value.update
+      delete = timeouts.value.delete
     }
   }
 
@@ -108,7 +106,7 @@ resource "random_shuffle" "this" {
   ################################
   count = local.enable_nat_gateway
 
-  input = [for k, v in aws_subnet.public : v.id]
+  input = [for k, v in aws_subnet.this : v.id if can(regex("^(?i)public-", k))]
 
   result_count = 1
 }

@@ -4,12 +4,6 @@ locals {
 
   enable = var.enable ? 1 : 0
 
-  # prefix = "${join(module.const.delimiter, compact([
-  #   module.const.prefix,
-  #   var.env,
-  #   var.name,
-  # ]))}${module.const.delimiter}"
-
   prefix = join(module.const.delimiter, compact([
     module.const.prefix,
     var.env,

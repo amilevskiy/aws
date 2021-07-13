@@ -1,4 +1,4 @@
-# формально: чистим и пусть висят
+# подходим формально: чистим и пусть висят
 
 #https://www.terraform.io/docs/providers/aws/r/default_vpc_dhcp_options.html
 resource "aws_default_vpc_dhcp_options" "this" {
@@ -10,7 +10,7 @@ resource "aws_default_vpc_dhcp_options" "this" {
   tags = merge(local.tags, {
     Name = join(module.const.delimiter, [
       module.const.prefix,
-      var.default_label,
+      var.label.default,
       module.const.dhcp_options_suffix,
     ])
   })
@@ -29,7 +29,7 @@ resource "aws_default_route_table" "this" {
   tags = merge(local.tags, {
     Name = join(module.const.delimiter, [
       local.prefix,
-      var.default_label,
+      var.label.default,
       module.const.rtb_suffix,
     ])
   })
@@ -63,7 +63,7 @@ resource "aws_default_network_acl" "this" {
   tags = merge(local.tags, {
     Name = join(module.const.delimiter, [
       local.prefix,
-      var.default_label,
+      var.label.default,
       module.const.acl_suffix,
     ])
   })
@@ -83,7 +83,7 @@ resource "aws_default_security_group" "this" {
   tags = merge(local.tags, {
     Name = join(module.const.delimiter, [
       local.prefix,
-      var.default_label,
+      var.label.default,
       module.const.sg_suffix,
     ])
   })
