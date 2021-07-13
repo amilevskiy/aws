@@ -1,0 +1,22 @@
+#https://terraform.io/docs/configuration/terraform.html
+terraform {
+  #########
+  required_version = "~> 1.0"
+}
+
+#https://terraform.io/docs/configuration/providers.html
+provider "aws" {
+  ##############
+  region      = var.aws_region
+  max_retries = 12
+  profile     = var.aws_profile
+
+  skip_credentials_validation = true
+  skip_get_ec2_platforms      = true
+  skip_metadata_api_check     = true
+  skip_region_validation      = true
+  skip_requesting_account_id  = true
+  default_tags {
+    tags = local.tags
+  }
+}
