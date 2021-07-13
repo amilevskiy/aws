@@ -7,7 +7,7 @@ module "const" {
 ##################
 module "central" {
   ################
-  source = "github.com/amilevskiy/aws//vpc?ref=v0.0.1"
+  source = "github.com/amilevskiy/aws//vpc?ref=v0.0.2"
   enable = var.enable
 
   env = var.env
