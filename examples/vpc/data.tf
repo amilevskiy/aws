@@ -1,16 +1,12 @@
-#https://www.terraform.io/docs/providers/aws/d/availability_zones.html
-data "aws_availability_zones" "available" {
-  #########################################
-  count = local.enable
-
-  state = "available"
-}
-
 locals {
-  availability_zones = try(zipmap(
-    flatten(data.aws_availability_zones.available.*.names),
-    flatten(data.aws_availability_zones.available.*.zone_ids)
-  ), {})
+  availability_zones = {
+    "us-east-1a" = "use1-az2"
+    "us-east-1b" = "use1-az4"
+    "us-east-1c" = "use1-az6"
+    "us-east-1d" = "use1-az1"
+    "us-east-1e" = "use1-az3"
+    "us-east-1f" = "use1-az5"
+  }
 }
 
 #https://www.terraform.io/docs/configuration/locals.html
