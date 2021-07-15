@@ -153,8 +153,7 @@ locals {
   cidr_chunks = local.enable_subnets ? chunklist(
     cidrsubnets(var.vpc.cidr_block, flatten([for v in local.subnets_order : [
       for vv in local.keys : var.max_ipv4_prefix - local.vpc_cidr_prefix - (
-        var.subnets[v].hosts != null ? ceil(
-          log(var.subnets[v].hosts, 2)
+        var.subnets[v].hosts != null ? ceil(log(var.subnets[v].hosts, 2)
         ) : ceil(log(var.hosts[v], 2))
       )
   ]])...), length(local.keys)) : [[]]
