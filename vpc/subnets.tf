@@ -161,16 +161,16 @@ locals {
   subnets = { for v in [
     for v in setproduct(local.subnets_order, [
       for v in local.keys : substr(v, -1, 1)
-    ]) : join("-", v)
+    ]) : join(module.const.delimiter, v)
     ] : v => {
-    subnet     = replace(v, "/-.*/", "")
+    subnet     = split(module.const.delimiter, v)[0]
     zone_index = index([for v in local.keys : substr(v, -1, 1)], substr(v, -1, 1))
     cidr_block = element(
-      var.subnets[replace(v, "/-.*/", "")].cidr_blocks != null
-      ? var.subnets[replace(v, "/-.*/", "")].cidr_blocks
-      : element(local.cidr_chunks, index(local.subnets_order, replace(v, "/-.*/", ""))),
+      var.subnets[split(module.const.delimiter, v)[0]].cidr_blocks != null
+      ? var.subnets[split(module.const.delimiter, v)[0]].cidr_blocks
+      : element(local.cidr_chunks, index(local.subnets_order, split(module.const.delimiter, v)[0])),
       index([for v in local.keys : substr(v, -1, 1)], substr(v, -1, 1))
     )
-    map_public_ip_on_launch_default = lower(replace(v, "/-.*/", "")) == "public"
+    map_public_ip_on_launch_default = lower(split(module.const.delimiter, v)[0]) == "public"
   } }
 }

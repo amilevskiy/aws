@@ -25,6 +25,7 @@ resource "aws_default_route_table" "this" {
 
   #must!
   route = []
+  propagating_vgws = []
 
   tags = merge(local.tags, {
     Name = join(module.const.delimiter, [

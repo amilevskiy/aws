@@ -51,3 +51,9 @@ output "network_acls" {
   #####################
   value = try(aws_network_acl.this, null)
 }
+
+#########################################
+output "transit_gateway_vpc_attachment" {
+  #######################################
+  value = try(aws_ec2_transit_gateway_vpc_attachment.this[0], null)
+}

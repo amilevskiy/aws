@@ -32,8 +32,8 @@ resource "aws_route_table_association" "this" {
 
 
 #https://www.terraform.io/docs/providers/aws/r/route.html
-resource "aws_route" "public-default" {
-  #####################################
+resource "aws_route" "default_for_public" {
+  #########################################
   count = local.enable_internet_gateway > 0 && contains(local.subnets_order, "public") ? 1 : 0
 
   route_table_id         = aws_route_table.this["public"].id
@@ -42,8 +42,8 @@ resource "aws_route" "public-default" {
 }
 
 #https://www.terraform.io/docs/providers/aws/r/route.html
-resource "aws_route" "private-default" {
-  ######################################
+resource "aws_route" "default_for_private" {
+  ##########################################
   for_each = toset(local.enable_nat_gateway > 0 ? [
     for v in local.subnets_order : v if !contains(["public", "secured"], v)
   ] : [])
@@ -51,4 +51,18 @@ resource "aws_route" "private-default" {
   route_table_id         = aws_route_table.this[each.key].id
   destination_cidr_block = module.const.cidr_any
   nat_gateway_id         = aws_nat_gateway.this[0].id
+}
+
+
+#https://www.terraform.io/docs/providers/aws/r/route.html
+resource "aws_route" "transit_gateway" {
+  ######################################
+  for_each = toset([for v in setproduct(
+    local.subnets_order,
+    local.transit_gateway_route_cidrs
+  ) : join(module.const.delimiter, v)])
+
+  route_table_id         = aws_route_table.this[split(module.const.delimiter, each.key)[0]].id
+  destination_cidr_block = split(module.const.delimiter, each.key)[1]
+  transit_gateway_id     = aws_ec2_transit_gateway_vpc_attachment.this[0].transit_gateway_id
 }

@@ -6,7 +6,7 @@ resource "aws_network_acl" "this" {
   vpc_id = aws_vpc.this[0].id
 
   subnet_ids = [
-    for k, v in aws_subnet.this : v.id if can(regex(join(each.key, ["^", "-"]), k))
+    for k, v in aws_subnet.this : v.id if can(regex(join(each.key, ["^", module.const.delimiter]), k))
   ]
 
   tags = merge(local.tags, {
