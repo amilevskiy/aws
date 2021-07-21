@@ -7,6 +7,8 @@ variable "nat_gateway" {
 
     network_border_group = optional(string)
 
+    subnet_index = optional(number)
+
     timeouts = optional(object({
       read   = optional(string)
       update = optional(string)
@@ -29,7 +31,9 @@ variable "nat_gateway" {
 
 
 locals {
-  enable_nat_gateway = local.enable_internet_gateway > 0 && local.enable_subnets && var.nat_gateway != null ? var.subnets.public != null ? 1 : 0 : 0
+  enable_nat_gateway = local.enable_internet_gateway > 0 && (
+    local.enable_subnets && var.nat_gateway != null
+  ) ? var.subnets.public != null ? 1 : 0 : 0
 
   nat_gateway_prefix = var.nat_gateway != null ? (
     var.nat_gateway.name_prefix != null ? var.nat_gateway.name_prefix : local.prefix
@@ -76,7 +80,11 @@ resource "aws_nat_gateway" "this" {
   count = local.enable_nat_gateway
 
   allocation_id = aws_eip.this[0].id
-  subnet_id     = element(flatten(random_shuffle.this.*.result), 0)
+
+  #subnet_id     = element(flatten(random_shuffle.this.*.result), 0)
+  subnet_id = [for k, v in aws_subnet.this : v.id if can(regex("^(?i)public-", k))][
+    var.nat_gateway.subnet_index != null ? var.nat_gateway.subnet_index : 0
+  ]
 
   # поскольу мы не можем подготовить заранее aws_network_interface для aws_nat_gateway,
   # поэтому такой "финт ушами" для "протэггивания" ресурса
@@ -101,12 +109,10 @@ resource "aws_nat_gateway" "this" {
   })
 }
 
-#https://www.terraform.io/docs/providers/random/r/shuffle.html
-resource "random_shuffle" "this" {
-  ################################
-  count = local.enable_nat_gateway
-
-  input = [for k, v in aws_subnet.this : v.id if can(regex("^(?i)public-", k))]
-
-  result_count = 1
-}
+# #https://www.terraform.io/docs/providers/random/r/shuffle.html
+# resource "random_shuffle" "this" {
+#   ################################
+#   count = local.enable_nat_gateway
+#   input = [for k, v in aws_subnet.this : v.id if can(regex("^(?i)public-", k))]
+#   result_count = 1
+# }

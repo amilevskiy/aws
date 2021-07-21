@@ -12,21 +12,19 @@ variable "iam" {
 
 
 locals {
-  enable_iam = var.enable && var.iam != null ? var.instance != null ? lookup(
-    var.instance, "iam_instance_profile", null
-  ) != null ? 0 : 1 : 1 : 0
+  enable_iam = var.enable && var.iam != null ? var.instance != null ? (
+    var.instance.iam_instance_profile != null
+  ) ? 0 : 1 : 1 : 0
 
-  iam_name = local.enable_iam > 0 && var.iam != null ? lookup(
-    var.iam, "name", null
-  ) != null ? var.iam.name : local.instance_name : null
+  iam_name = local.enable_iam > 0 && var.iam != null ? var.iam.name != null ? (
+    var.iam.name
+  ) : local.instance_name : null
 
-  iam_inline_policy_document = local.enable_iam > 0 && var.iam != null ? lookup(
-    var.iam, "inline_policy_document", null
-  ) != null ? var.iam.inline_policy_document : "" : ""
+  iam_inline_policy_document = local.enable_iam > 0 && var.iam != null ? (
+    var.iam.inline_policy_document != null
+  ) ? var.iam.inline_policy_document : "" : ""
 
-  iam_policy_arns = local.enable_iam > 0 && var.iam != null ? lookup(
-    var.iam, "policy_arns", null
-    ) != null ? {
+  iam_policy_arns = local.enable_iam > 0 && var.iam != null ? var.iam.policy_arns != null ? {
     for v in var.iam.policy_arns : replace(v, "/\\//", "") => v
   } : {} : {}
 }
@@ -52,10 +50,10 @@ resource "aws_iam_role" "this" {
   ##############################
   count = local.enable_iam
 
-  name_prefix = "${join(module.const.delimiter, [
+  name_prefix = "${substr(join(module.const.delimiter, [
     "iamRole",
     local.iam_name,
-  ])}${module.const.delimiter}"
+  ]), 0, 31)}${module.const.delimiter}"
 
   description = "Allows access to AWS resources for ${local.instance_name}-instance"
 

@@ -1,7 +1,7 @@
 ################
 module "const" {
   ##############
-  source = "github.com/amilevskiy/const?ref=v0.1.4"
+  source = "github.com/amilevskiy/const?ref=v0.1.6"
 }
 
 #https://www.terraform.io/docs/providers/aws/r/ram_resource_share.html
