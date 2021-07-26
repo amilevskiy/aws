@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/providers/aws/r/spot_instance_request.html
+#https://www.terraform.io/docs/providers/aws/r/instance.html
 resource "aws_instance" "this" {
   ##############################
   count = local.enable_on_demand
@@ -65,9 +65,9 @@ resource "aws_instance" "this" {
   dynamic "ephemeral_block_device" {
     for_each = var.instance.ephemeral_block_device != null ? var.instance.ephemeral_block_device : []
     content {
-      device_name    = ephemeral_block_device.value.device_name
-      no_device_name = ephemeral_block_device.value.no_device_name
-      virtual_name   = ephemeral_block_device.value.virtual_name
+      device_name  = ephemeral_block_device.value.device_name
+      no_device    = ephemeral_block_device.value.no_device
+      virtual_name = ephemeral_block_device.value.virtual_name
     }
   }
 

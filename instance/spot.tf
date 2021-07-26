@@ -10,6 +10,7 @@ locals {
   ) : "${local.prefix}${module.const.delimiter}${module.const.instance_suffix}" : null
 }
 
+#https://www.terraform.io/docs/providers/aws/r/instance.html
 #https://www.terraform.io/docs/providers/aws/r/spot_instance_request.html
 resource "aws_spot_instance_request" "this" {
   ###########################################
@@ -98,9 +99,9 @@ resource "aws_spot_instance_request" "this" {
   dynamic "ephemeral_block_device" {
     for_each = var.instance.ephemeral_block_device != null ? var.instance.ephemeral_block_device : []
     content {
-      device_name    = ephemeral_block_device.value.device_name
-      no_device_name = ephemeral_block_device.value.no_device_name
-      virtual_name   = ephemeral_block_device.value.virtual_name
+      device_name  = ephemeral_block_device.value.device_name
+      no_device    = ephemeral_block_device.value.no_device
+      virtual_name = ephemeral_block_device.value.virtual_name
     }
   }
 
