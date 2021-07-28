@@ -45,6 +45,11 @@ variable "leader_tgw_id" {
   default = "tgw-06773499e1535c4e9"
 }
 
+variable "leader_resource_association_default_route_table_id" {
+  type    = string
+  default = null
+}
+
 variable "follower_principal" {
   type    = string
   default = ""

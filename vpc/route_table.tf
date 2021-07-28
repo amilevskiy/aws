@@ -53,16 +53,16 @@ resource "aws_route" "default_for_private" {
   nat_gateway_id         = aws_nat_gateway.this[0].id
 }
 
-
 #https://www.terraform.io/docs/providers/aws/r/route.html
 resource "aws_route" "transit_gateway" {
   ######################################
-  for_each = toset([for v in setproduct(
-    local.subnets_order,
-    local.transit_gateway_route_cidrs
-  ) : join(module.const.delimiter, v)])
+  for_each = local.vpc_routes
 
-  route_table_id         = aws_route_table.this[split(module.const.delimiter, each.key)[0]].id
+  route_table_id = aws_route_table.this[
+    split(module.const.delimiter, each.key)[0]
+  ].id
+
   destination_cidr_block = split(module.const.delimiter, each.key)[1]
-  transit_gateway_id     = aws_ec2_transit_gateway_vpc_attachment.this[0].transit_gateway_id
+
+  transit_gateway_id = each.value
 }

@@ -5,11 +5,11 @@ variable "subnets" {
     availability_zones    = optional(list(string))
     availability_zone_ids = optional(list(string))
 
-    map_public_ip_on_launch         = optional(bool) # Defaults false
-    assign_ipv6_address_on_creation = optional(bool) # Defaults false
+    map_public_ip_on_launch         = optional(bool) # Default: false
+    assign_ipv6_address_on_creation = optional(bool) # Default: false
 
     # intentionally omit support of the following due to lack of testing?
-    map_customer_owned_ip_on_launch = optional(bool) # Defaults false
+    map_customer_owned_ip_on_launch = optional(bool) # Default: false
     outpost_arn                     = optional(string)
 
     propagating_vgws = optional(list(string))
@@ -20,12 +20,12 @@ variable "subnets" {
       hosts = optional(number)
 
       cidr_blocks             = optional(list(string))
-      map_public_ip_on_launch = optional(bool) # Defaults false
+      map_public_ip_on_launch = optional(bool) # Default: false
 
-      assign_ipv6_address_on_creation = optional(bool)         # Defaults false
+      assign_ipv6_address_on_creation = optional(bool)         # Default: false
       ipv6_cidr_blocks                = optional(list(string)) # /64
 
-      map_customer_owned_ip_on_launch = optional(bool) # Defaults false
+      map_customer_owned_ip_on_launch = optional(bool) # Default: false
       customer_owned_ipv4_pool        = optional(list(string))
       outpost_arn                     = optional(string)
 
@@ -38,12 +38,12 @@ variable "subnets" {
       hosts = optional(number)
 
       cidr_blocks             = optional(list(string))
-      map_public_ip_on_launch = optional(bool) # Defaults false
+      map_public_ip_on_launch = optional(bool) # Default: false
 
-      assign_ipv6_address_on_creation = optional(bool)         # Defaults false
+      assign_ipv6_address_on_creation = optional(bool)         # Default: false
       ipv6_cidr_blocks                = optional(list(string)) # /64
 
-      map_customer_owned_ip_on_launch = optional(bool) # Defaults false
+      map_customer_owned_ip_on_launch = optional(bool) # Default: false
       customer_owned_ipv4_pool        = optional(list(string))
       outpost_arn                     = optional(string)
 
@@ -56,12 +56,12 @@ variable "subnets" {
       hosts = optional(number)
 
       cidr_blocks             = optional(list(string))
-      map_public_ip_on_launch = optional(bool) # Defaults false
+      map_public_ip_on_launch = optional(bool) # Default: false
 
-      assign_ipv6_address_on_creation = optional(bool)         # Defaults false
+      assign_ipv6_address_on_creation = optional(bool)         # Default: false
       ipv6_cidr_blocks                = optional(list(string)) # /64
 
-      map_customer_owned_ip_on_launch = optional(bool) # Defaults false
+      map_customer_owned_ip_on_launch = optional(bool) # Default: false
       customer_owned_ipv4_pool        = optional(list(string))
       outpost_arn                     = optional(string)
 
@@ -74,12 +74,12 @@ variable "subnets" {
       hosts = optional(number)
 
       cidr_blocks             = optional(list(string))
-      map_public_ip_on_launch = optional(bool) # Defaults false
+      map_public_ip_on_launch = optional(bool) # Default: false
 
-      assign_ipv6_address_on_creation = optional(bool)         # Defaults false
+      assign_ipv6_address_on_creation = optional(bool)         # Default: false
       ipv6_cidr_blocks                = optional(list(string)) # /64
 
-      map_customer_owned_ip_on_launch = optional(bool) # Defaults false
+      map_customer_owned_ip_on_launch = optional(bool) # Default: false
       customer_owned_ipv4_pool        = optional(list(string))
       outpost_arn                     = optional(string)
 
@@ -92,16 +92,37 @@ variable "subnets" {
       hosts = optional(number)
 
       cidr_blocks             = optional(list(string))
-      map_public_ip_on_launch = optional(bool) # Defaults false
+      map_public_ip_on_launch = optional(bool) # Default: false
 
-      assign_ipv6_address_on_creation = optional(bool)         # Defaults false
+      assign_ipv6_address_on_creation = optional(bool)         # Default: false
       ipv6_cidr_blocks                = optional(list(string)) # /64
 
-      map_customer_owned_ip_on_launch = optional(bool) # Defaults false
+      map_customer_owned_ip_on_launch = optional(bool) # Default: false
       customer_owned_ipv4_pool        = optional(list(string))
       outpost_arn                     = optional(string)
 
       propagating_vgws = optional(list(string))
+
+      # nice to do: network_acl_cidr_blocks = optional(list(string))
+      network_acl_cidr_block = optional(string)
+
+      transit_gateway_vpc_attachments = optional(list(object({
+        name = optional(string)
+
+        id = string
+
+        appliance_mode_support = optional(string) # Default: disable
+        dns_support            = optional(string) # Default: enable
+        ipv6_support           = optional(string) # Default: disable
+
+        transit_gateway_default_route_table_association = optional(bool) # Default: true
+        transit_gateway_default_route_table_propagation = optional(bool) # Default: true
+
+        vpc_routes = optional(list(string))
+
+        association_default_route_table_id = optional(string)
+        transit_gateway_static_routes      = optional(list(string))
+      })))
     }))
 
     timeouts = optional(object({

@@ -39,3 +39,9 @@ output "follower_resource_share_accepter" {
   #########################################
   value = try(aws_ram_resource_share_accepter.follower[0], null)
 }
+
+##########################
+output "transit_gateway" {
+  ########################
+  value = try(data.aws_ec2_transit_gateway.leader[0], null)
+}
