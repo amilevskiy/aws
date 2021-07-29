@@ -3,7 +3,7 @@ data "aws_ec2_transit_gateway" "leader" {
   #######################################
   provider = aws.leader
 
-  count = var.enable && length(var.leader_resource_arn) == 0 ? 1 : 0
+  count = var.enable && (var.leader_resource_arn == null || var.leader_resource_arn == "") ? 1 : 0
 
   id = var.leader_tgw_id
 }
@@ -13,7 +13,7 @@ data "aws_caller_identity" "follower" {
   #####################################
   provider = aws.follower
 
-  count = var.enable && length(var.follower_principal) == 0 ? 1 : 0
+  count = var.enable && (var.follower_principal == null || var.follower_principal == "") ? 1 : 0
 }
 
 

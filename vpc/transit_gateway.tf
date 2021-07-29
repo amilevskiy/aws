@@ -2,7 +2,7 @@ locals {
   transit_gateway_vpc_attachments = local.enable_subnets ? lookup(
     var.subnets, "secured", null
     ) != null ? lookup(var.subnets.secured, "transit_gateway_vpc_attachments", null) != null ? {
-    for v in var.subnets.secured.transit_gateway_vpc_attachments : v.id => v
+    for v in var.subnets.secured.transit_gateway_vpc_attachments : v.id => v if v.id != null && v.id != ""
   } : {} : {} : {}
 
   route_to_tgw_list = flatten([
@@ -50,10 +50,11 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   transit_gateway_default_route_table_association = each.value.transit_gateway_default_route_table_association
   transit_gateway_default_route_table_propagation = each.value.transit_gateway_default_route_table_propagation
 
+  #не работает! : try(each.value.name, ...
   tags = {
-    Name = try(each.value.name, join(module.const.delimiter, [
+    Name = lookup(each.value, "name", null) != null ? each.value.name : join(module.const.delimiter, [
       local.vpc_name, each.key, module.const.tgw_attachment_suffix
-    ]))
+    ])
   }
 }
 
@@ -65,4 +66,7 @@ resource "aws_ec2_transit_gateway_route" "this" {
   destination_cidr_block         = split(":", each.key)[1]
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[split(":", each.key)[0]].id
   transit_gateway_route_table_id = each.value
+
+  #need this!
+  depends_on = [aws_ec2_transit_gateway_vpc_attachment.this]
 }

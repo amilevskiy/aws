@@ -19,6 +19,10 @@ resource "aws_network_acl" "this" {
       module.const.acl_suffix,
     ])
   })
+
+  lifecycle {
+    ignore_changes = [ingress, egress]
+  }
 }
 
 #https://www.terraform.io/docs/providers/aws/r/network_acl_rule.html

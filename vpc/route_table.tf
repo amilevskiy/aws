@@ -19,6 +19,10 @@ resource "aws_route_table" "this" {
       module.const.rtb_suffix,
     ])
   })
+
+  lifecycle {
+    ignore_changes = [route]
+  }
 }
 
 #https://www.terraform.io/docs/providers/aws/r/route_table_association.html
@@ -65,4 +69,8 @@ resource "aws_route" "transit_gateway" {
   destination_cidr_block = split(module.const.delimiter, each.key)[1]
 
   transit_gateway_id = each.value
+
+  lifecycle {
+    ignore_changes = [state]
+  }
 }

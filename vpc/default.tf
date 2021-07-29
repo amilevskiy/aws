@@ -24,7 +24,7 @@ resource "aws_default_route_table" "this" {
   default_route_table_id = aws_vpc.this[0].default_route_table_id
 
   #must!
-  route = []
+  route            = []
   propagating_vgws = []
 
   tags = merge(local.tags, {
@@ -34,6 +34,9 @@ resource "aws_default_route_table" "this" {
       module.const.rtb_suffix,
     ])
   })
+  lifecycle {
+    ignore_changes = [propagating_vgws]
+  }
 }
 
 #https://www.terraform.io/docs/providers/aws/r/default_network_acl.html
@@ -70,7 +73,7 @@ resource "aws_default_network_acl" "this" {
   })
 
   lifecycle {
-    ignore_changes = [subnet_ids]
+    ignore_changes = [subnet_ids, ingress, egress]
   }
 }
 
@@ -88,4 +91,8 @@ resource "aws_default_security_group" "this" {
       module.const.sg_suffix,
     ])
   })
+
+  lifecycle {
+    ignore_changes = [ingress, egress]
+  }
 }

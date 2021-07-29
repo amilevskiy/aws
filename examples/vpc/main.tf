@@ -1,7 +1,7 @@
 ################
 module "const" {
   ##############
-  source = "github.com/amilevskiy/const?ref=v0.1.6"
+  source = "github.com/amilevskiy/const?ref=v0.1.7"
 }
 
 ##################

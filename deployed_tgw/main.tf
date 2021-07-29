@@ -1,7 +1,7 @@
 ################
 module "const" {
   ##############
-  source = "github.com/amilevskiy/const?ref=v0.1.6"
+  source = "github.com/amilevskiy/const?ref=v0.1.7"
 }
 
 #https://www.terraform.io/docs/providers/aws/r/ram_resource_share.html
@@ -60,16 +60,4 @@ resource "aws_ram_resource_share_accepter" "follower" {
   count = local.enable
 
   share_arn = aws_ram_principal_association.leader[0].resource_share_arn
-}
-
-#https://www.terraform.io/docs/providers/aws/r/ram_resource_association.html
-resource "aws_ram_resource_association" "leader_association_default_route_table_id" {
-  ###################################################################################
-  provider = aws.leader
-
-  count = local.enable
-
-  #arn:aws:ec2:us-east-1:318068638372:transit-gateway/tgw-06773499e1535c4e9
-  resource_arn       = coalescelist(data.aws_ec2_transit_gateway.leader.*.association_default_route_table_id, [var.leader_resource_association_default_route_table_id])[0]
-  resource_share_arn = aws_ram_resource_share.leader[0].arn
 }
