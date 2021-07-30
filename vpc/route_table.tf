@@ -73,4 +73,6 @@ resource "aws_route" "transit_gateway" {
   lifecycle {
     ignore_changes = [state]
   }
+
+  depends_on = [aws_ec2_transit_gateway_vpc_attachment.this]
 }

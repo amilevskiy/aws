@@ -44,11 +44,25 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
     for k, v in aws_subnet.this : v.id if can(regex("^secured-", k))
   ]
 
-  appliance_mode_support                          = each.value.appliance_mode_support
-  dns_support                                     = each.value.dns_support
-  ipv6_support                                    = each.value.ipv6_support
-  transit_gateway_default_route_table_association = each.value.transit_gateway_default_route_table_association
-  transit_gateway_default_route_table_propagation = each.value.transit_gateway_default_route_table_propagation
+  appliance_mode_support = each.value.enable_appliance_mode_support != null ? (
+    var.bool2string[each.value.enable_appliance_mode_support]
+  ) : null
+
+  dns_support = each.value.enable_dns_support != null ? (
+    var.bool2string[each.value.enable_dns_support]
+  ) : null
+
+  ipv6_support = each.value.enable_ipv6_support != null ? (
+    var.bool2string[each.value.enable_ipv6_support]
+  ) : null
+
+  transit_gateway_default_route_table_association = each.value.enable_default_route_table_association != null ? (
+    each.value.enable_default_route_table_association
+  ) : null
+
+  transit_gateway_default_route_table_propagation = each.value.enable_default_route_table_propagation != null ? (
+    each.value.enable_default_route_table_propagation
+  ) : null
 
   #не работает! : try(each.value.name, ...
   tags = {

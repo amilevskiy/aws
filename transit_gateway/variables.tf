@@ -19,7 +19,10 @@ variable "tags" {
   description = "(Optional) A mapping of tags which should be assigned to all module resources"
 }
 
-variable "awscli_args" {
-  default     = "no"
-  description = "(Optional) The AWS CLI arguments [e.g. --profile DEVOPS]"
+variable "bool2string" {
+  type = map(string)
+  default = {
+    true  = "enable"
+    false = "disable"
+  }
 }

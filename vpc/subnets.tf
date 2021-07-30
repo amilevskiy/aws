@@ -110,13 +110,18 @@ variable "subnets" {
         name = optional(string)
 
         id = string
+        # appliance_mode_support = optional(string) # Default: disable
+        # dns_support            = optional(string) # Default: enable
+        # ipv6_support           = optional(string) # Default: disable
 
-        appliance_mode_support = optional(string) # Default: disable
-        dns_support            = optional(string) # Default: enable
-        ipv6_support           = optional(string) # Default: disable
+        # transit_gateway_default_route_table_association = optional(bool) # Default: true
+        # transit_gateway_default_route_table_propagation = optional(bool) # Default: true
 
-        transit_gateway_default_route_table_association = optional(bool) # Default: true
-        transit_gateway_default_route_table_propagation = optional(bool) # Default: true
+        enable_appliance_mode_support          = optional(bool) # Default: disable
+        enable_dns_support                     = optional(bool) # Default: enable
+        enable_ipv6_support                    = optional(bool) # Default: disable
+        enable_default_route_table_association = optional(bool) # Default: true
+        enable_default_route_table_propagation = optional(bool) # Default: true
 
         vpc_routes = optional(list(string))
 

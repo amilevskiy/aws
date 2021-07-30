@@ -62,3 +62,11 @@ variable "max_ipv4_prefix" {
   type    = number
   default = 32
 }
+
+variable "bool2string" {
+  type = map(string)
+  default = {
+    true  = "enable"
+    false = "disable"
+  }
+}
