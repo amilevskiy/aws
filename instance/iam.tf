@@ -50,10 +50,10 @@ resource "aws_iam_role" "this" {
   ##############################
   count = local.enable_iam
 
-  name_prefix = "${substr(join(module.const.delimiter, [
+  name_prefix = "${replace(substr(join(module.const.delimiter, [
     "iamRole",
     local.iam_name,
-  ]), 0, 32-length(module.const.delimiter))}${module.const.delimiter}"
+  ]), 0, 32 - length(module.const.delimiter)), "/-+$/", "")}${module.const.delimiter}"
 
   description = "Allows access to AWS resources for ${local.instance_name}-instance"
 
@@ -105,10 +105,10 @@ resource "aws_iam_instance_profile" "this" {
   ##########################################
   count = local.enable_iam
 
-  name_prefix = "${substr(join(module.const.delimiter, [
+  name_prefix = "${replace(substr(join(module.const.delimiter, [
     "iamProfile",
     local.iam_name,
-  ]), 0, 64-length(module.const.delimiter))}${module.const.delimiter}"
+  ]), 0, 64 - length(module.const.delimiter)), "/-+$/", "")}${module.const.delimiter}"
 
   role = aws_iam_role.this[0].name
 
