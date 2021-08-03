@@ -26,7 +26,9 @@ locals {
 
   count_line = var.resource_share != null ? (
     var.resource_share.resource_share_accepter_template_count_line != null
-    ? var.resource_share.resource_share_accepter_template_count_line
+    ? replace(replace(
+      var.resource_share.resource_share_accepter_template_count_line,
+    "/\\s*$/", ""), "/^\\s*/", "")
   : "count = local.enable") : "count = local.enable"
 }
 
@@ -86,7 +88,7 @@ data "template_file" "this" {
 resource "aws_ram_resource_share_accepter" "$${resource_id}" {
   provider = $${provider}
 
-  $${count_line}
+${local.count_line != "" ? "  " : ""}$${count_line}
 
   share_arn = "$${share_arn}"
 }
