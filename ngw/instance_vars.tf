@@ -71,7 +71,7 @@ variable "instance" {
       http_tokens                 = optional(string) # optional or required. Defaults to optional
     }))
 
-    enable_monitoring = optional(bool)
+    monitoring = optional(bool)
 
     network_interface = optional(list(object({
       device_index          = number

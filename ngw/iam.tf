@@ -12,9 +12,11 @@ variable "iam" {
 
 
 locals {
-  enable_iam = var.enable && var.iam != null ? var.instance != null ? (
-    var.instance.iam_instance_profile != null
-  ) ? 0 : 1 : 1 : 0
+  instance_name = var.enable && var.instance != null ? var.instance.name != null ? (
+    var.instance.name
+  ) : "${local.prefix}${module.const.delimiter}${module.const.instance_suffix}" : "${local.prefix}${module.const.delimiter}${module.const.instance_suffix}"
+
+  enable_iam = var.enable && var.iam != null ? 1 : 0
 
   iam_name = local.enable_iam > 0 ? var.iam.name != null ? (
     var.iam.name
@@ -45,6 +47,7 @@ data "aws_iam_policy_document" "assume" {
   }
 }
 
+
 #https://www.terraform.io/docs/providers/aws/r/iam_role.html
 resource "aws_iam_role" "this" {
   ##############################
@@ -68,7 +71,6 @@ resource "aws_iam_role" "this" {
   }
 }
 
-#как-то надо сделать условную генерацию policy только для t2|t3|t3a-инстансов
 #https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
 resource "aws_iam_role_policy" "this" {
   #####################################
@@ -94,8 +96,19 @@ data "aws_iam_policy_document" "inline" {
   count = local.enable_iam > 0 && local.iam_inline_policy_document == "" ? 1 : 0
 
   statement {
-    sid       = "ModifyInstanceCreditSpecification"
-    actions   = ["ec2:ModifyInstanceCreditSpecification"]
+    actions = [
+      "ec2:CreateRoute",
+      "ec2:DeleteRoute",
+      "ec2:Describe*",
+      "ec2:GetLaunchTemplateData",
+      "ec2:ModifyInstanceCreditSpecification",
+      "ec2:ModifyNetworkInterfaceAttribute",
+      "route53:GetHostedZone",
+      "route53:ListHostedZones",
+      "route53:ListHostedZonesByName",
+      "route53:ChangeResourceRecordSets",
+      "route53:ListResourceRecordSets"
+    ]
     resources = ["*"]
   }
 }

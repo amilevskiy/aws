@@ -63,9 +63,9 @@ resource "aws_spot_instance_request" "this" {
   cpu_threads_per_core = var.instance.cpu_threads_per_core
 
   dynamic "credit_specification" {
-    for_each = var.instance.cpu_credits != null ? [true] : []
+    for_each = var.instance.cpu_credits != null ? [var.instance.cpu_credits] : []
     content {
-      cpu_credits = var.instance.cpu_credits
+      cpu_credits = credit_specification.value
     }
   }
 
@@ -90,9 +90,9 @@ resource "aws_spot_instance_request" "this" {
   ebs_optimized = var.instance.ebs_optimized
 
   dynamic "enclave_options" {
-    for_each = var.instance.enable_enclave != null ? [true] : []
+    for_each = var.instance.enable_enclave != null ? [var.instance.enable_enclave] : []
     content {
-      enabled = var.instance.enable_enclave
+      enabled = enclave_options.value
     }
   }
 
