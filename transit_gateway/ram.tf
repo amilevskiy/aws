@@ -77,7 +77,7 @@ data "template_file" "this" {
   for_each = local.follower_principals
 
   vars = {
-    resource_id = "_${each.key}"
+    resource_id = "${aws_ec2_transit_gateway.this[0].id}_${each.key}"
     provider    = each.value
     share_arn   = aws_ram_principal_association.this[each.key].resource_share_arn
     count_line  = local.count_line

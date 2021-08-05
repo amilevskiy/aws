@@ -95,7 +95,7 @@ resource "aws_instance" "this" {
     }
   }
 
-  monitoring = var.instance.monitoring
+  monitoring = var.instance.enable_monitoring
 
   dynamic "network_interface" {
     for_each = var.instance.network_interface != null ? var.instance.network_interface : []
