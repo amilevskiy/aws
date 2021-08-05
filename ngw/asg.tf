@@ -35,15 +35,15 @@ variable "autoscaling_group" {
           version              = optional(string) # Can be version number, $Latest, or $Default. Default: $Default
         }))
 
-        override = optional(object({
-          instance_type = optional(string)
+        override = optional(list(object({
+          instance_type     = optional(string)
+          weighted_capacity = optional(string)
           launch_template_specification = optional(object({
             launch_template_id   = optional(string)
             launch_template_name = optional(string)
             version              = optional(string) # Can be version number, $Latest, or $Default. Default: $Default
           }))
-          weighted_capacity = optional(string)
-        }))
+        })))
       }))
     }))
 
@@ -99,6 +99,12 @@ variable "autoscaling_group" {
     }))
 
     force_delete_warm_pool = optional(bool)
+
+    tag = optional(list(object({
+      propagate_at_launch = bool
+      key                 = string
+      value               = string
+    })))
   })
   default = null
 }
@@ -142,17 +148,6 @@ resource "aws_autoscaling_group" "this" {
   dynamic "mixed_instances_policy" {
     for_each = var.autoscaling_group.mixed_instances_policy != null ? [var.autoscaling_group.mixed_instances_policy] : []
     content {
-      dynamic "instances_distribution" {
-        for_each = mixed_instances_policy.value.instances_distribution != null ? [mixed_instances_policy.value.instances_distribution] : []
-        content {
-          on_demand_allocation_strategy            = instances_distribution.value.on_demand_allocation_strategy
-          on_demand_base_capacity                  = instances_distribution.value.on_demand_base_capacity
-          on_demand_percentage_above_base_capacity = instances_distribution.value.on_demand_percentage_above_base_capacity
-          spot_allocation_strategy                 = instances_distribution.value.spot_allocation_strategy
-          spot_instance_pools                      = instances_distribution.value.spot_instance_pools
-          spot_max_price                           = instances_distribution.value.spot_max_price
-        }
-      }
 
       dynamic "launch_template" {
         for_each = mixed_instances_policy.value.launch_template != null ? [mixed_instances_policy.value.launch_template] : []
@@ -160,14 +155,17 @@ resource "aws_autoscaling_group" "this" {
           dynamic "launch_template_specification" {
             for_each = launch_template.value.launch_template_specification != null ? [launch_template.value.launch_template_specification] : []
             content {
-              launch_template_id   = launch_template_specification.value.launch_template_id
+              launch_template_id = launch_template_specification.value.launch_template_id != null ? launch_template_specification.value.launch_template_id : try(
+                aws_launch_template.this[0].id, null
+              )
+
               launch_template_name = launch_template_specification.value.launch_template_name
               version              = launch_template_specification.value.version
             }
           }
 
           dynamic "override" {
-            for_each = launch_template.value.override != null ? [launch_template.value.override] : []
+            for_each = launch_template.value.override != null ? launch_template.value.override : []
             content {
               instance_type     = override.value.instance_type
               weighted_capacity = override.value.weighted_capacity
@@ -182,6 +180,18 @@ resource "aws_autoscaling_group" "this" {
               }
             }
           }
+        }
+      }
+
+      dynamic "instances_distribution" {
+        for_each = mixed_instances_policy.value.instances_distribution != null ? [mixed_instances_policy.value.instances_distribution] : []
+        content {
+          on_demand_allocation_strategy            = instances_distribution.value.on_demand_allocation_strategy
+          on_demand_base_capacity                  = instances_distribution.value.on_demand_base_capacity
+          on_demand_percentage_above_base_capacity = instances_distribution.value.on_demand_percentage_above_base_capacity
+          spot_allocation_strategy                 = instances_distribution.value.spot_allocation_strategy
+          spot_instance_pools                      = instances_distribution.value.spot_instance_pools
+          spot_max_price                           = instances_distribution.value.spot_max_price
         }
       }
     }
@@ -252,4 +262,15 @@ resource "aws_autoscaling_group" "this" {
   }
 
   force_delete_warm_pool = var.autoscaling_group.force_delete_warm_pool
+
+  depends_on = [aws_launch_template.this]
+
+  dynamic "tag" {
+    for_each = var.autoscaling_group.tag != null ? var.autoscaling_group.tag : []
+    content {
+      propagate_at_launch = tag.value.propagate_at_launch
+      key                 = tag.value.key
+      value               = tag.value.value
+    }
+  }
 }

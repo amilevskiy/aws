@@ -51,6 +51,7 @@ variable "launch_template" {
     }))
 
     image_id                             = optional(string)
+    default_volume_size                  = optional(number)
     instance_initiated_shutdown_behavior = optional(string) # stop and terminate
 
     instance_market_options = optional(object({
@@ -174,7 +175,7 @@ resource "aws_launch_template" "this" {
         kms_key_id            = null
         snapshot_id           = null
         throughput            = null
-        volume_size           = null #?
+        volume_size           = var.launch_template.default_volume_size
         volume_type           = "standard"
       }
     }]
@@ -333,9 +334,9 @@ resource "aws_launch_template" "this" {
       associate_carrier_ip_address = null
       associate_public_ip_address  = true
       delete_on_termination        = true
-      description                  = null #
+      description                  = "${local.launch_template_name}${module.const.delimiter}${module.const.eni_suffix}"
       device_index                 = 0
-      security_groups              = null #
+      security_groups              = aws_security_group.this.*.id
       ipv6_address_count           = null
       ipv6_addresses               = null
       network_interface_id         = null
@@ -351,7 +352,7 @@ resource "aws_launch_template" "this" {
       delete_on_termination        = network_interfaces.value.delete_on_termination
       description                  = network_interfaces.value.description
       device_index                 = network_interfaces.value.device_index
-      security_groups              = network_interfaces.value.security_groups
+      security_groups              = network_interfaces.value.security_groups != null ? network_interfaces.value.security_groups : aws_security_group.this.*.id
       ipv6_address_count           = network_interfaces.value.ipv6_address_count
       ipv6_addresses               = network_interfaces.value.ipv6_addresses
       network_interface_id         = network_interfaces.value.network_interface_id
@@ -377,9 +378,9 @@ resource "aws_launch_template" "this" {
     }
   }
 
-  ram_disk_id            = var.launch_template.ram_disk_id
-  security_group_names   = var.launch_template.security_group_names != null ? var.launch_template.security_group_names : null
-  vpc_security_group_ids = var.launch_template.vpc_security_group_ids != null ? var.launch_template.vpc_security_group_ids : []
+  ram_disk_id = var.launch_template.ram_disk_id
+  # security_group_names   = var.launch_template.security_group_names != null ? var.launch_template.security_group_names : null
+  # vpc_security_group_ids = var.launch_template.vpc_security_group_ids != null ? var.launch_template.vpc_security_group_ids : aws_security_group.this.*.id
 
   dynamic "tag_specifications" {
     for_each = var.launch_template.tag_specifications != null ? var.launch_template.tag_specifications : []
