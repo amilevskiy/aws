@@ -10,6 +10,8 @@ variable "transit_gateway" {
     enable_default_route_table_propagation = optional(bool)
     enable_dns_support                     = optional(bool)
     enable_vpn_ecmp_support                = optional(bool)
+
+    static_routes = optional(map(bool))
   })
 
   default = null
@@ -20,6 +22,10 @@ locals {
     ? var.transit_gateway.name
     : "${local.prefix}${module.const.delimiter}${module.const.tgw_suffix}"
   ) : null
+
+  transit_gateway_static_routes = var.enable && var.transit_gateway != null && var.transit_gateway_peering != null ? (
+    var.transit_gateway.static_routes != null
+  ) ? var.transit_gateway.static_routes : {} : {}
 }
 
 #https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway.html
@@ -57,4 +63,17 @@ resource "aws_ec2_transit_gateway" "this" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route.html
+resource "aws_ec2_transit_gateway_route" "this" {
+  ###############################################
+  for_each = local.transit_gateway_static_routes
+
+  transit_gateway_route_table_id = aws_ec2_transit_gateway.this[0].association_default_route_table_id
+  destination_cidr_block         = each.key
+  blackhole                      = each.value ? each.value : null
+  transit_gateway_attachment_id  = each.value ? null : aws_ec2_transit_gateway_peering_attachment.this[0].id
+
+  depends_on = [aws_ec2_transit_gateway_peering_attachment_accepter.this]
 }

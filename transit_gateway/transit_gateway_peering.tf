@@ -2,9 +2,12 @@ variable "transit_gateway_peering" {
   type = object({
     name = optional(string)
 
-    peer_account_id         = optional(string)
-    peer_region             = string
-    peer_transit_gateway_id = string
+    peer_account_id                     = optional(string)
+    peer_region                         = string
+    peer_transit_gateway_id             = string
+    peer_transit_gateway_route_table_id = optional(string)
+
+    static_routes = optional(map(bool))
   })
 
   default = null
@@ -17,9 +20,13 @@ locals {
     ? var.transit_gateway_peering.name
     : "${local.prefix}${module.const.delimiter}${module.const.tgw_suffix}${module.const.delimiter}${module.const.tgw_peering_suffix}"
   ) : null
+
+  transit_gateway_peering_static_routes = var.enable && var.transit_gateway != null && var.transit_gateway_peering != null ? (
+    var.transit_gateway_peering.peer_transit_gateway_route_table_id != null
+  ) ? var.transit_gateway_peering.static_routes != null ? var.transit_gateway_peering.static_routes : {} : {} : {}
 }
 
-#https://www.terraform.io/docs/providers/aws/r/aws_ec2_transit_gateway_peering_attachment.html
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_peering_attachment.html
 resource "aws_ec2_transit_gateway_peering_attachment" "this" {
   ############################################################
   count = local.enable_transit_gateway_peering
@@ -35,7 +42,7 @@ resource "aws_ec2_transit_gateway_peering_attachment" "this" {
 
 }
 
-#https://www.terraform.io/docs/providers/aws/r/aws_ec2_transit_gateway_peering_attachment_accepter.html
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_peering_attachment_accepter.html
 resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
   #####################################################################
   provider = aws.peer
@@ -49,15 +56,17 @@ resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
   })
 }
 
-# #https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route.html
-# resource "aws_ec2_transit_gateway_route" "this" {
-#   ###############################################
-#   for_each = local.transit_gateway_static_routes
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route.html
+resource "aws_ec2_transit_gateway_route" "peer" {
+  ###############################################
+  provider = aws.peer
 
-#   destination_cidr_block         = split(":", each.key)[1]
-#   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[split(":", each.key)[0]].id
-#   transit_gateway_route_table_id = each.value
+  for_each = local.transit_gateway_peering_static_routes
 
-#   #need this!
-#   depends_on = [aws_ec2_transit_gateway_vpc_attachment.this]
-# }
+  transit_gateway_route_table_id = var.transit_gateway_peering.peer_transit_gateway_route_table_id
+  destination_cidr_block         = each.key
+  blackhole                      = each.value ? each.value : null
+  transit_gateway_attachment_id  = each.value ? null : aws_ec2_transit_gateway_peering_attachment.this[0].id
+
+  depends_on = [aws_ec2_transit_gateway_peering_attachment_accepter.this]
+}
