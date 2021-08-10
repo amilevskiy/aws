@@ -8,6 +8,22 @@ locals {
   instance_name = var.enable && var.instance != null ? var.instance.name != null ? (
     var.instance.name
   ) : "${local.prefix}${module.const.delimiter}${module.const.instance_suffix}" : null
+
+  subnet_id = (var.enable && var.instance != null
+    ? var.instance.subnet_id != null
+    ? var.instance.subnet_id
+    : element(flatten(random_shuffle.this.*.result), 0)
+    : null
+  )
+}
+
+#https://www.terraform.io/docs/providers/random/r/shuffle.html
+resource "random_shuffle" "this" {
+  ################################
+  count = var.enable && var.instance != null ? var.instance.subnet_id == null ? 1 : 0 : 0
+
+  input        = var.instance.subnet_ids
+  result_count = 1
 }
 
 #https://www.terraform.io/docs/providers/aws/r/instance.html
@@ -159,7 +175,7 @@ resource "aws_spot_instance_request" "this" {
   secondary_private_ips = var.instance.secondary_private_ips
   security_groups       = var.instance.security_groups
   source_dest_check     = var.instance.source_dest_check
-  subnet_id             = var.instance.subnet_id
+  subnet_id             = local.subnet_id
   tenancy               = var.instance.tenancy
   user_data             = var.instance.user_data
   user_data_base64      = var.instance.user_data_base64

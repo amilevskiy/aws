@@ -93,10 +93,13 @@ variable "instance" {
     }))
 
     # A list of secondary private IPv4 addresses to assign to the instance's primary network interface (eth0) in a VPC. Can only be assigned to the primary network interface (eth0) attached at instance creation, not a pre-existing network interface i.e. referenced in a network_interface block. Refer to the Elastic network interfaces documentation to see the maximum number of private IP addresses allowed per instance type.
-    secondary_private_ips  = optional(list(string))
-    security_groups        = optional(list(string))
-    source_dest_check      = optional(bool) # Defaults true.
-    subnet_id              = optional(string)
+    secondary_private_ips = optional(list(string))
+    security_groups       = optional(list(string))
+    source_dest_check     = optional(bool) # Defaults true.
+
+    subnet_id  = optional(string)
+    subnet_ids = optional(list(string))
+
     tenancy                = optional(string) #Dedicated, Default,Host,
     user_data              = optional(string)
     user_data_base64       = optional(string)

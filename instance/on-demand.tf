@@ -125,7 +125,7 @@ resource "aws_instance" "this" {
   secondary_private_ips = var.instance.secondary_private_ips
   security_groups       = var.instance.security_groups
   source_dest_check     = var.instance.source_dest_check
-  subnet_id             = var.instance.subnet_id
+  subnet_id             = local.subnet_id
   tenancy               = var.instance.tenancy
   user_data             = var.instance.user_data
   user_data_base64      = var.instance.user_data_base64
