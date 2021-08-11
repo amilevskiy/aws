@@ -39,7 +39,6 @@ resource "aws_ram_resource_association" "leader" {
   resource_share_arn = aws_ram_resource_share.leader[0].arn
 }
 
-
 #https://www.terraform.io/docs/providers/aws/r/ram_principal_association.html
 resource "aws_ram_principal_association" "leader" {
   #################################################
@@ -51,6 +50,18 @@ resource "aws_ram_principal_association" "leader" {
   resource_share_arn = aws_ram_resource_share.leader[0].arn
 }
 
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route.html
+resource "aws_ec2_transit_gateway_route" "this" {
+  ################################################
+  provider = aws.leader
+
+  for_each = local.routes
+
+  destination_cidr_block         = split(":", each.key)[1]
+  transit_gateway_attachment_id  = split(":", each.key)[0]
+  transit_gateway_route_table_id = var.transit_gateway_route_table_id
+}
+
 
 #https://www.terraform.io/docs/providers/aws/r/ram_resource_share_accepter.html
 resource "aws_ram_resource_share_accepter" "follower" {
@@ -60,4 +71,6 @@ resource "aws_ram_resource_share_accepter" "follower" {
   count = local.enable
 
   share_arn = aws_ram_principal_association.leader[0].resource_share_arn
+
+  depends_on = [aws_ram_resource_association.leader]
 }

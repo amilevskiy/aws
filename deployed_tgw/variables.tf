@@ -49,3 +49,13 @@ variable "follower_principal" {
   type    = string
   default = null
 }
+
+variable "transit_gateway_route_table_id" {
+  type    = string
+  default = ""
+}
+
+variable "routes" {
+  type    = map(list(string))
+  default = null
+}

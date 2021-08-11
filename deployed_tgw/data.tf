@@ -32,4 +32,9 @@ locals {
   #   Terraform   = "true"
   # }, var.tags) : {}
   tags = var.tags
+
+  # ["tgw-attach-06773499e1535c4e9:100.64.0.0/10", "tgw-attach-06773499e1535c4e9:10.192.0.0/10"]
+  routes = toset(var.enable && var.routes != null && var.transit_gateway_route_table_id != "" ? flatten([
+    for k, v in var.routes : [for list in setproduct([k], v) : join(":", list)] if can(regex("^tgw-attach-", k))
+  ]) : [])
 }

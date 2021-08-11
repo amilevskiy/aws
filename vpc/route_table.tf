@@ -74,5 +74,5 @@ resource "aws_route" "transit_gateway" {
     ignore_changes = [state]
   }
 
-  depends_on = [aws_ec2_transit_gateway_vpc_attachment.this]
+  depends_on = [aws_ec2_transit_gateway_vpc_attachment.this, aws_route_table.this]
 }
