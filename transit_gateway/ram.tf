@@ -5,7 +5,7 @@ variable "resource_share" {
     allow_external_principals = optional(bool)
     follower_principals       = optional(map(string))
 
-    resource_share_accepter_template_count_line = optional(string)
+    depends_on_list = list(string)
   })
 
   default = null
@@ -14,22 +14,21 @@ variable "resource_share" {
 locals {
   enable_resource_share = var.enable && var.resource_share != null ? 1 : 0
 
-  resource_share_name = local.enable_resource_share > 0 ? (
-    var.resource_share.name != null
+  resource_share_name = (local.enable_resource_share > 0
+    ? var.resource_share.name != null
     ? var.resource_share.name
     : "${local.transit_gateway_name}${module.const.delimiter}${module.const.ram_suffix}"
-  ) : null
+  : null)
 
-  follower_principals = local.enable_resource_share > 0 ? (
-    var.resource_share.follower_principals != null
-  ) ? var.resource_share.follower_principals : {} : {}
+  follower_principals = (local.enable_resource_share > 0
+    ? var.resource_share.follower_principals != null
+    ? var.resource_share.follower_principals
+  : {} : {})
 
-  count_line = var.resource_share != null ? (
-    var.resource_share.resource_share_accepter_template_count_line != null
-    ? replace(replace(
-      var.resource_share.resource_share_accepter_template_count_line,
-    "/\\s*$/", ""), "/^\\s*/", "")
-  : "count = local.enable") : "count = local.enable"
+  depends_on_list = (local.enable_resource_share > 0
+    ? var.resource_share.depends_on_list != null
+    ? var.resource_share.depends_on_list
+  : [] : [])
 }
 
 #https://www.terraform.io/docs/providers/aws/r/ram_resource_share.html
@@ -80,7 +79,10 @@ data "template_file" "this" {
     resource_id = "${aws_ec2_transit_gateway.this[0].id}_${each.key}"
     provider    = each.value
     share_arn   = aws_ram_principal_association.this[each.key].resource_share_arn
-    count_line  = local.count_line
+    count_condition = (length(local.depends_on_list) > 0
+      ? join(" && ", formatlist("%s.enable", local.depends_on_list))
+      : "var.enable"
+    )
   }
 
   #https://www.terraform.io/docs/providers/aws/r/ram_resource_share_accepter.html
@@ -88,9 +90,11 @@ data "template_file" "this" {
 resource "aws_ram_resource_share_accepter" "$${resource_id}" {
   provider = $${provider}
 
-${local.count_line != "" ? "  " : ""}$${count_line}
+  count = $${count_condition} ? 1 : 0
 
   share_arn = "$${share_arn}"
+
+${length(local.depends_on_list) > 0 ? format("  depends_on = [%s]", join(", ", local.depends_on_list)) : ""}
 }
 	TEMPLATE
 }
