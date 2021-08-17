@@ -37,11 +37,10 @@ resource "aws_network_acl_rule" "ingress" {
   rule_action = "allow"
   protocol    = "-1"
 
-  cidr_block = (each.key == "secured"
-    ? var.subnets.secured.network_acl_cidr_block != null
-    ? var.subnets.secured.network_acl_cidr_block
-    : aws_vpc.this[0].cidr_block
-  : module.const.cidr_any)
+  cidr_block = each.key == "secured" ? coalesce(
+    var.subnets.secured.network_acl_cidr_block,
+    aws_vpc.this[0].cidr_block
+  ) : module.const.cidr_any
 }
 
 #https://www.terraform.io/docs/providers/aws/r/network_acl_rule.html
@@ -56,9 +55,8 @@ resource "aws_network_acl_rule" "egress" {
   rule_action = "allow"
   protocol    = "-1"
 
-  cidr_block = (each.key == "secured"
-    ? var.subnets.secured.network_acl_cidr_block != null
-    ? var.subnets.secured.network_acl_cidr_block
-    : aws_vpc.this[0].cidr_block
-  : module.const.cidr_any)
+  cidr_block = each.key == "secured" ? coalesce(
+    var.subnets.secured.network_acl_cidr_block,
+    aws_vpc.this[0].cidr_block
+  ) : module.const.cidr_any
 }

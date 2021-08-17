@@ -1,4 +1,4 @@
-variable "  " {
+variable "vpc_endpoint" {
   type = object({
     name_prefix = optional(string)
 
@@ -32,36 +32,33 @@ locals {
 
   enable_data_region = (local.enable_vpc_endpoint > 0
     ? var.vpc_endpoint.region == null
-    ? alltrue([for k, v in var.vpc_endpoint.services : v.region != null])
+    ? alltrue([for k, v in var.vpc_endpoint.services : can(coalesce(v.region))])
   ? 0 : 1 : 0 : 0)
 
-  vpc_endpoint_security_groups = local.enable_vpc_endpoint > 0 ? {
-    for k, v in var.vpc_endpoint.services : k => k if(v.vpc_endpoint_type != null
-      ? v.vpc_endpoint_type == "Interface" && v.security_group_ids == null
-    : false)
-  } : {}
+  vpc_endpoint_security_groups = toset(local.enable_vpc_endpoint > 0 ? [
+    for k, v in var.vpc_endpoint.services : k if(
+      coalesce(v.vpc_endpoint_type, "Gateway") == "Interface" && v.security_group_ids == null
+  )] : [])
 
   vpc_endpoint_subnet = try([
     for v in ["secured", "lb", "misc", "k8s", "public"] : v if contains(local.subnets_order, v)
   ][0], "")
 
   vpc_endpoints = local.enable_vpc_endpoint > 0 ? {
-    for k, v in var.vpc_endpoint.services : "${k}:${
-      v.region != null
-      ? v.region
-      : var.vpc_endpoint.region != null
-      ? var.vpc_endpoint.region
-      : join("", data.aws_region.this.*.name)
-    }" => v
+    for k, v in var.vpc_endpoint.services : "${k}:${coalesce(
+      v.region,
+      var.vpc_endpoint.region,
+      join("", data.aws_region.this.*.name)
+    )}" => v
   } : {}
 }
+
 
 #https://www.terraform.io/docs/providers/aws/d/region.html
 data "aws_region" "this" {
   ########################
   count = local.enable_data_region
 }
-
 
 #https://www.terraform.io/docs/providers/aws/r/security_group.html
 resource "aws_security_group" "this" {
@@ -73,9 +70,9 @@ resource "aws_security_group" "this" {
 
   vpc_id = aws_vpc.this[0].id
 
-  tags = {
+  tags = merge(local.tags, {
     Name = "${local.prefix}${module.const.delimiter}${each.key}${module.const.delimiter}${module.const.sg_suffix}"
-  }
+  })
 
   dynamic "timeouts" {
     for_each = var.vpc_endpoint.timeouts != null ? [var.vpc_endpoint.timeouts] : []
@@ -131,32 +128,26 @@ resource "aws_vpc_endpoint" "this" {
 
   vpc_endpoint_type = each.value.vpc_endpoint_type # Gateway, GatewayLoadBalancer, Interface
 
-  route_table_ids = (each.value.vpc_endpoint_type != null
-    ? each.value.vpc_endpoint_type == "Gateway"
+  route_table_ids = (coalesce(each.value.vpc_endpoint_type, "Gateway") == "Gateway"
     ? [for k, v in aws_route_table.this : v.id]
-    : null
-  : [for k, v in aws_route_table.this : v.id])
+  : null)
 
   security_group_ids = (each.value.security_group_ids != null
     ? each.value.security_group_ids
-    : each.value.vpc_endpoint_type != null
-    ? each.value.vpc_endpoint_type == "Interface"
+    : coalesce(each.value.vpc_endpoint_type, "Gateway") == "Interface"
     ? [aws_security_group.this[split(":", each.key)[0]].id]
-  : null : null) # Interface (required)
+  : null) # Interface (required)
 
-  subnet_ids = (each.value.vpc_endpoint_type != null
-    ? each.value.vpc_endpoint_type == "GatewayLoadBalancer" || each.value.vpc_endpoint_type == "Interface"
-    ? [for k, v in aws_subnet.this : v.id if can(
-      regex(join(local.vpc_endpoint_subnet, ["^", module.const.delimiter]), k)
-  )] : null : null) # GatewayLoadBalancer, Interface
+  subnet_ids = (contains(["GatewayLoadBalancer", "Interface"], coalesce(each.value.vpc_endpoint_type, "Gateway"))
+    ? [for k, v in aws_subnet.this : v.id if can(regex(join(local.vpc_endpoint_subnet, ["^", module.const.delimiter]), k))]
+    : null
+  ) # GatewayLoadBalancer, Interface
 
   tags = merge(local.tags, {
-    Name = (each.value.name != null
-      ? each.value.name
-      : join(module.const.delimiter, [
-        local.prefix,
-        split(":", each.key)[0],
-        module.const.vpc_endpoint_suffix
+    Name = coalesce(each.value.name, join(module.const.delimiter, [
+      local.prefix,
+      split(":", each.key)[0],
+      module.const.vpc_endpoint_suffix
     ]))
   })
 

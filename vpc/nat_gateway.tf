@@ -35,11 +35,10 @@ locals {
     ? var.subnets.public != null
   ? 1 : 0 : 0)
 
-  nat_gateway_prefix = (var.nat_gateway != null
-    ? var.nat_gateway.name_prefix != null
-    ? var.nat_gateway.name_prefix
-    : local.prefix
-  : null)
+  nat_gateway_prefix = var.nat_gateway != null ? coalesce(
+    var.nat_gateway.name_prefix,
+    local.prefix
+  ) : null
 }
 
 
@@ -83,21 +82,7 @@ resource "aws_nat_gateway" "this" {
 
   allocation_id = aws_eip.this[0].id
 
-  #subnet_id     = element(flatten(random_shuffle.this.*.result), 0)
-  subnet_id = [for k, v in aws_subnet.this : v.id if can(regex("^(?i)public-", k))][
-    var.nat_gateway.subnet_index != null ? var.nat_gateway.subnet_index : 0
-  ]
-
-  # поскольу мы не можем подготовить заранее aws_network_interface для aws_nat_gateway,
-  # поэтому такой "финт ушами" для "протэггивания" ресурса
-  provisioner "local-exec" {
-    command = <<-COMMAND
-  test '${var.awscli_args}' = 'no' ||
-  	aws ${var.awscli_args} ec2 create-tags \
-  		--resources ${self.network_interface_id} \
-  		--tags  'Key=Name,Value=${join(module.const.delimiter, compact([local.nat_gateway_prefix, module.const.ngw_suffix, module.const.eni_suffix]))}'
-  COMMAND
-  }
+  subnet_id = aws_subnet.this[random_shuffle.this[0].result[0]].id
 
   lifecycle {
     create_before_destroy = true
@@ -111,10 +96,28 @@ resource "aws_nat_gateway" "this" {
   })
 }
 
-# #https://www.terraform.io/docs/providers/random/r/shuffle.html
-# resource "random_shuffle" "this" {
-#   ################################
-#   count = local.enable_nat_gateway
-#   input = [for k, v in aws_subnet.this : v.id if can(regex("^(?i)public-", k))]
-#   result_count = 1
-# }
+#https://www.terraform.io/docs/providers/random/r/shuffle.html
+resource "random_shuffle" "this" {
+  ################################
+  count = local.enable_nat_gateway
+
+  input = [for k, v in local.subnets : k if can(regex("^(?i)public-", k))]
+
+  result_count = 1
+}
+
+#https://www.terraform.io/docs/providers/aws/r/ec2_tag.html
+resource "aws_ec2_tag" "this" {
+  #############################
+  for_each = local.enable_nat_gateway > 0 ? merge(local.tags, {
+    Name = join(module.const.delimiter, [
+      local.nat_gateway_prefix,
+      module.const.ngw_suffix,
+      module.const.eni_suffix
+    ])
+  }) : {}
+
+  resource_id = aws_nat_gateway.this[0].network_interface_id
+  key         = each.key
+  value       = each.value
+}

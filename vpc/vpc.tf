@@ -28,9 +28,9 @@ locals {
   enable_vpc = var.enable && var.vpc != null ? 1 : 0
 
   #!! doesn't work: try(var.vpc.name, "${local.prefix}${module.const.vpc_suffix}")
-  vpc_name = var.vpc != null ? (var.vpc.name != null
-    ? var.vpc.name
-    : "${local.prefix}${module.const.delimiter}${module.const.vpc_suffix}"
+  vpc_name = var.vpc != null ? coalesce(
+    var.vpc.name,
+    "${local.prefix}${module.const.delimiter}${module.const.vpc_suffix}"
   ) : null
 }
 
