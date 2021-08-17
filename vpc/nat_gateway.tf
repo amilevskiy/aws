@@ -31,13 +31,15 @@ variable "nat_gateway" {
 
 
 locals {
-  enable_nat_gateway = local.enable_internet_gateway > 0 && (
-    local.enable_subnets && var.nat_gateway != null
-  ) ? var.subnets.public != null ? 1 : 0 : 0
+  enable_nat_gateway = (local.enable_internet_gateway > 0 && local.enable_subnets && var.nat_gateway != null
+    ? var.subnets.public != null
+  ? 1 : 0 : 0)
 
-  nat_gateway_prefix = var.nat_gateway != null ? (
-    var.nat_gateway.name_prefix != null ? var.nat_gateway.name_prefix : local.prefix
-  ) : null
+  nat_gateway_prefix = (var.nat_gateway != null
+    ? var.nat_gateway.name_prefix != null
+    ? var.nat_gateway.name_prefix
+    : local.prefix
+  : null)
 }
 
 

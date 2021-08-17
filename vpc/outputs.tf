@@ -57,3 +57,21 @@ output "transit_gateway_vpc_attachment" {
   #######################################
   value = try(aws_ec2_transit_gateway_vpc_attachment.this, null)
 }
+
+#######################
+output "vpc_endpoint" {
+  #####################
+  value = try(aws_vpc_endpoint.this, null)
+}
+
+#######################################
+output "vpc_endpoint_security_groups" {
+  #####################################
+  value = try(aws_security_group.this, null)
+}
+
+#############################
+output "enable_data_region" {
+  ###########################
+  value = local.enable_data_region
+}

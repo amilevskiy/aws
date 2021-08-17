@@ -160,13 +160,15 @@ locals {
   # Have been simplified due to validation {} in variable "subnets" {} validation above
   # availability_zone_enabled = length(local.availability_zones) > 0
   # availability_zone_id_enabled = !local.availability_zone_enabled && length(local.availability_zone_ids) > 0
-  availability_zones = local.enable_subnets ? (
-    var.subnets.availability_zones != null ? var.subnets.availability_zones : []
-  ) : []
+  availability_zones = (local.enable_subnets
+    ? var.subnets.availability_zones != null
+    ? var.subnets.availability_zones
+  : [] : [])
 
-  availability_zone_ids = local.enable_subnets ? (
-    var.subnets.availability_zone_ids != null ? var.subnets.availability_zone_ids : []
-  ) : []
+  availability_zone_ids = (local.enable_subnets
+    ? var.subnets.availability_zone_ids != null
+    ? var.subnets.availability_zone_ids
+  : [] : [])
 
   keys = try(coalescelist(local.availability_zones, local.availability_zone_ids), [])
 
@@ -178,11 +180,9 @@ locals {
 
   cidr_chunks = local.enable_subnets ? chunklist(
     cidrsubnets(var.vpc.cidr_block, flatten([for v in local.subnets_order : [
-      for vv in local.keys : var.max_ipv4_prefix - local.vpc_cidr_prefix - (
-        var.subnets[v].hosts != null ? ceil(log(var.subnets[v].hosts, 2)
-        ) : ceil(log(var.hosts[v], 2))
-      )
-  ]])...), length(local.keys)) : [[]]
+      for vv in local.keys : var.max_ipv4_prefix - local.vpc_cidr_prefix - ceil(log(
+        var.subnets[v].hosts != null ? var.subnets[v].hosts : var.hosts[v], 2
+  ))]])...), length(local.keys)) : [[]]
 
   subnets = { for v in [
     for v in setproduct(local.subnets_order, [

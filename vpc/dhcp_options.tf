@@ -29,11 +29,11 @@ variable "dhcp_options" {
 locals {
   enable_dhcp_options = local.enable_vpc > 0 && var.dhcp_options != null ? 1 : 0
 
-  dhcp_options_name = var.dhcp_options != null ? (
-    var.dhcp_options.name != null
+  dhcp_options_name = (var.dhcp_options != null
+    ? var.dhcp_options.name != null
     ? var.dhcp_options.name
     : "${local.prefix}${module.const.delimiter}${module.const.dhcp_options_suffix}"
-  ) : null
+  : null)
 }
 
 

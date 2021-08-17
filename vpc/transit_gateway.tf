@@ -1,9 +1,10 @@
 locals {
-  transit_gateway_vpc_attachments = local.enable_subnets ? lookup(
-    var.subnets, "secured", null
-    ) != null ? lookup(var.subnets.secured, "transit_gateway_vpc_attachments", null) != null ? {
-    for v in var.subnets.secured.transit_gateway_vpc_attachments : v.id => v if v.id != null && v.id != ""
-  } : {} : {} : {}
+  transit_gateway_vpc_attachments = (local.enable_subnets
+    ? var.subnets.secured != null
+    ? var.subnets.secured.transit_gateway_vpc_attachments != null
+    ? {
+      for v in var.subnets.secured.transit_gateway_vpc_attachments : v.id => v if v.id != null ? v.id != "" : false
+  } : {} : {} : {})
 
   route_to_tgw_list = flatten([
     for k, v in local.transit_gateway_vpc_attachments : [
@@ -66,9 +67,11 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 
   #не работает! : try(each.value.name, ...
   tags = {
-    Name = lookup(each.value, "name", null) != null ? each.value.name : join(module.const.delimiter, [
-      local.vpc_name, each.key, module.const.tgw_attachment_suffix
-    ])
+    Name = (each.value.name != null
+      ? each.value.name
+      : join(module.const.delimiter, [
+        local.vpc_name, each.key, module.const.tgw_attachment_suffix
+    ]))
   }
 }
 
