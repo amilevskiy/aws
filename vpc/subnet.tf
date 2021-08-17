@@ -49,14 +49,14 @@ resource "aws_subnet" "this" {
 
   tags = merge(local.tags, {
     Name = join(module.const.delimiter, [
-      var.subnets[each.value.subnet].name_prefix != null ? (
-        var.subnets[each.value.subnet].name_prefix
-        ) : var.subnets.name_prefix != null ? (
-        var.subnets.name_prefix
-        ) : join(module.const.delimiter, [
+      coalesce(
+        var.subnets[each.value.subnet].name_prefix,
+        var.subnets.name_prefix,
+        join(module.const.delimiter, [
           local.prefix,
           var.label[each.value.subnet]
-      ]),
+        ])
+      ),
       substr(each.key, -1, 1),
       module.const.subnet_suffix,
     ])

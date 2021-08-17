@@ -69,9 +69,3 @@ output "vpc_endpoint_security_groups" {
   #####################################
   value = try(aws_security_group.this, null)
 }
-
-#############################
-output "enable_data_region" {
-  ###########################
-  value = local.enable_data_region
-}
