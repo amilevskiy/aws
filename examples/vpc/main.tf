@@ -1,13 +1,13 @@
 ################
 module "const" {
   ##############
-  source = "github.com/amilevskiy/const?ref=v0.1.9"
+  source = "github.com/amilevskiy/const?ref=v0.1.10"
 }
 
 ##################
 module "central" {
   ################
-  source = "github.com/amilevskiy/aws//vpc?ref=v0.0.7"
+  source = "github.com/amilevskiy/aws//vpc?ref=v0.0.8"
   enable = var.enable
 
   env = var.env
