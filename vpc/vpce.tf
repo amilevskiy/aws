@@ -1,3 +1,7 @@
+# TODO
+# secured:s3:us-east-1 -> secured-s3
+# сформировать local.vpc_endpoints за'merge'ив в него region, enable_*_embedding
+
 variable "vpc_endpoint" {
   type = object({
     name_prefix = optional(string)

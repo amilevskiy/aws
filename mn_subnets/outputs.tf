@@ -31,7 +31,7 @@ output "availability_zone_ids" {
 ##############
 output "vpc" {
   ############
-  value = try(aws_vpc.this[0], null)
+  value = try(var.vpc, null)
 }
 
 ##################
@@ -52,26 +52,17 @@ output "network_acls" {
   value = try(aws_network_acl.this, null)
 }
 
-#########################################
-output "transit_gateway_vpc_attachment" {
-  #######################################
-  value = try(aws_ec2_transit_gateway_vpc_attachment.this, null)
-}
 
-#######################
-output "vpc_endpoint" {
-  #####################
-  value = try(aws_vpc_endpoint.this, null)
-}
+# #########################
+# output "metadata_value" {
+#   #######################
+#   value = metadata_value.inbound
+# }
 
-#######################################
-output "vpc_endpoint_security_groups" {
-  #####################################
-  value = try(aws_security_group.this, null)
-}
-
-######################
-output "nat_gateway" {
-  ####################
-  value = try(aws_nat_gateway.this[0], null)
-}
+# output "enable_subnets" { value = local.enable_subnets }
+# output "subnets_keys" { value = local.subnets_keys }
+# output "inbound_sliced" { value = local.inbound_sliced }
+# output "inbound_expanded" { value = local.inbound_expanded }
+# output "inbound_normalized" { value = local.inbound_normalized }
+# output "inbound_keys" { value = local.inbound_keys }
+output "routes_expanded" { value = local.routes }

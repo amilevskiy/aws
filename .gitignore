@@ -7,6 +7,7 @@
 *.log
 *.old*
 *.orig*
+*.tf-
 *.sample
 Makefile.vars
 terraform.plan
