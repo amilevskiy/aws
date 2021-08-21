@@ -5,11 +5,5 @@ terraform {
     aws = {
       source = "hashicorp/aws"
     }
-    metadata = {
-      source = "skeggse/metadata"
-    }
-    # cidr = {
-    #   source = "hashicorp/cidr"
-    # }
   }
 }

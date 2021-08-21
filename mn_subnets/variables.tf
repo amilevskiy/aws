@@ -3,26 +3,10 @@ variable "enable" {
   description = "(Optional) Destroy all module resources if false"
 }
 
-variable "env" {
-  default     = ""
-  description = "(Optional) The name of target environment"
-}
-
-variable "name" {
-  default     = ""
-  description = "(Optional) The component of tag-name"
-}
-
 variable "tags" {
   type        = map(string)
   default     = {}
   description = "(Optional) A mapping of tags which should be assigned to all module resources"
-}
-
-
-variable "max_ipv4_prefix" {
-  type    = number
-  default = 32
 }
 
 variable "network_acl_rule_start" {
@@ -35,7 +19,26 @@ variable "network_acl_rule_step" {
   default = 10
 }
 
+variable "vpc_id" {
+  type = string
+}
+
 variable "vpc_endpoint_type_gateway_ids" {
   type    = map(string)
+  default = null
+}
+
+variable "availability_zone" {
+  type    = string
+  default = null
+}
+
+variable "availability_zone_id" {
+  type    = string
+  default = null
+}
+
+variable "map_public_ip_on_launch" {
+  type    = bool
   default = null
 }

@@ -1,15 +1,15 @@
 #https://www.terraform.io/docs/providers/aws/r/network_acl.html
 resource "aws_network_acl" "this" {
   #################################
-  for_each = local.subnets
+  for_each = local.subnet_keys
 
-  vpc_id = local.vpc_id
+  vpc_id = var.vpc_id
 
   subnet_ids = [aws_subnet.this[each.key].id]
 
   tags = merge(local.tags, {
     Name = join(module.const.delimiter, compact([
-      "NACL-",
+      "NACL",
       local.tf_stack,
       each.key
     ]))

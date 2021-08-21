@@ -3,7 +3,7 @@ resource "aws_route_table" "this" {
   #################################
   count = local.enable_route_table
 
-  vpc_id = local.vpc_id
+  vpc_id = var.vpc_id
 
   propagating_vgws = var.route_table.propagating_vgws
 

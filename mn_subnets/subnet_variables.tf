@@ -1,38 +1,6 @@
-# ############################
-# data "cidr_network" "test" {
-#   ##########################
-#   count = local.enable
-
-#   cidr_block          = var.vpc.cidr_block
-#   exclude_cidr_blocks = try(var.vpc.subnet_cidr_block, [])
-#   prefix_lengths      = local.prefix_lengths
-# }
-
-#https://www.terraform.io/docs/providers/external/data_source.html
-data "external" "cidr" {
-  ######################
-  count = min(1, length(local.subnets_keys))
-
-  program = [
-    "${path.module}/cidr_block",
-  ]
-
-  #The JSON object contains the contents of the query argument and its values will always be strings.
-  query = {
-    # cidr_block          = local.vpc_cidr_block
-    cidr_block          = var.vpc.cidr_block
-    exclude_cidr_blocks = join(" ", local.subnet_cidr_blocks)
-    # exclude_cidr_blocks = join(" ", flatten(random_shuffle.allocated_cidrs.*.result))
-    prefix_lengths = join(" ", local.prefix_lengths)
-  }
-}
-
-
 #для timeouts нет места :(
 variable "subnets" {
   type = map(object({
-    hosts = optional(number)
-
     availability_zone    = optional(string)
     availability_zone_id = optional(string)
 
@@ -50,26 +18,12 @@ variable "subnets" {
 locals {
   enable_subnets = var.enable && var.subnets != null ? min(1, length(var.subnets)) : 0
 
-  subnets_keys = local.enable_subnets > 0 ? keys(var.subnets) : toset([])
+  subnet_keys = toset(local.enable_subnets > 0 ? [for k, v in var.subnets : k if v.cidr_block != null] : [])
 
-  prefix_lengths = [
-    for k in local.subnets_keys : max(try(var.max_ipv4_prefix - ceil(log(var.subnets[k].hosts, 2)), 28), 28)
-  ]
-
-  cidr_blocks = flatten([for v in data.external.cidr.*.result.cidr_blocks : split(" ", v)])
-  # cidr_blocks = [for v in sort(flatten(random_shuffle.allocated_cidrs.*.result)) : split(":", v)[1]]
-
-  subnets = {
-    for i in range(length(local.subnets_keys)) : local.subnets_keys[i] => {
-      availability_zone       = var.subnets[local.subnets_keys[i]].availability_zone
-      availability_zone_id    = var.subnets[local.subnets_keys[i]].availability_zone_id
-      cidr_block              = local.cidr_blocks[i]
-      map_public_ip_on_launch = var.subnets[local.subnets_keys[i]].map_public_ip_on_launch
-    }
-  }
+  cidr_blocks = [for v in local.subnet_keys : var.subnets[v].cidr_block]
 
 
-  inbound_sliced = { for k in local.subnets_keys : k => ([
+  inbound_sliced = { for k in local.subnet_keys : k => ([
     for v in concat(
       formatlist("allow * %s", local.cidr_blocks),
       var.subnets[k].network_acl_inbound_rules != null ? var.subnets[k].network_acl_inbound_rules : []
@@ -100,9 +54,8 @@ locals {
   } # map(list(string))
 
 
-
   # for v in try(var.subnets[k].network_acl_outbound_rules, []) : split(" ", lower(replace(v, "/\\s+/", " ")))
-  outbound_sliced = { for k in local.subnets_keys : k => ([
+  outbound_sliced = { for k in local.subnet_keys : k => ([
     for v in concat(
       formatlist("allow * %s", local.cidr_blocks),
       var.subnets[k].network_acl_outbound_rules != null ? var.subnets[k].network_acl_outbound_rules : []
@@ -131,5 +84,4 @@ locals {
   outbound_network_acls = {
     for v in local.outbound_keys : v => local.outbound_normalized[split(module.const.delimiter, v)[0]][split(module.const.delimiter, v)[1]]
   } # map(list(string))
-
 }

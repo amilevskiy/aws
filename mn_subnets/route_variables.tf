@@ -18,9 +18,9 @@ locals {
 
   routes_expanded = flatten([
     for v in local.routes_sliced : [
-      for vv in split(",", v[0]) : join(" ", [vv, v[1]])
-    ] if try(v[1], "") != ""
-  ]) # list(string)
+      for vv in split(",", v[0]) : join(" ", [vv != "*" ? can(regex("/", vv)) ? vv : "${vv}/32" : module.const.cidr_any, v[1]])
+    ] if try(v[1], "") != "" # can(coalesce(v[1]))
+  ])                         # list(string)
 
   routes = {
     for v in local.routes_expanded : split(" ", v)[0] => split(" ", v)[1]
