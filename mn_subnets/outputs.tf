@@ -43,7 +43,7 @@ output "subnets" {
 #######################
 output "route_tables" {
   #####################
-  value = try(aws_route_table.this, null)
+  value = try(aws_route_table.this[0], null)
 }
 
 #######################
@@ -59,10 +59,6 @@ output "network_acls" {
 #   value = metadata_value.inbound
 # }
 
-# output "enable_subnets" { value = local.enable_subnets }
-# output "subnets_keys" { value = local.subnets_keys }
-# output "inbound_sliced" { value = local.inbound_sliced }
-# output "inbound_expanded" { value = local.inbound_expanded }
-# output "inbound_normalized" { value = local.inbound_normalized }
-# output "inbound_keys" { value = local.inbound_keys }
-output "routes_expanded" { value = local.routes }
+# output "routes_sliced" { value = local.routes_sliced }
+# output "routes_expanded" { value = local.routes_expanded }
+# output "routes" { value = local.routes }

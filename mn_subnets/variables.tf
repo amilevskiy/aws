@@ -26,30 +26,16 @@ variable "max_ipv4_prefix" {
 }
 
 variable "network_acl_rule_start" {
+  type    = number
   default = 1000
 }
 
 variable "network_acl_rule_step" {
+  type    = number
   default = 10
 }
 
-
-variable "client" {
-  default = ""
-}
-
-variable "account" {
-  default = ""
-}
-
-variable "region" {
-  default = ""
-}
-
-variable "serial" {
-  default = ""
-}
-
-variable "vpc_endpoint_id" {
+variable "vpc_endpoint_type_gateway_ids" {
+  type    = map(string)
   default = null
 }

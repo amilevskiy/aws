@@ -17,21 +17,12 @@ locals {
   : [] : []) # list(list(string))
 
   routes_expanded = flatten([
-    for v in local.routes_sliced : can(split(",", v[0])) ? [
-      for vv in split(",", v[0]) : join(" ", concat(
-        [vv], try(slice(v, 1, length(v)), [])
-    ))] : [join(" ", v)]
+    for v in local.routes_sliced : [
+      for vv in split(",", v[0]) : join(" ", [vv, v[1]])
+    ] if try(v[1], "") != ""
   ]) # list(string)
 
   routes = {
     for v in local.routes_expanded : split(" ", v)[0] => split(" ", v)[1]
   } # map(string)
-
-  # route_keys = flatten([
-  #   for v in setproduct(local.subnets_keys, keys(local.route_map)) : join(":", v)
-  # ]) # list(string)
-
-  # routes = {
-  #   for v in local.route_keys : v => local.route_map[split(":", v)[1]]
-  # }
 }

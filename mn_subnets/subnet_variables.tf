@@ -19,9 +19,11 @@ data "external" "cidr" {
 
   #The JSON object contains the contents of the query argument and its values will always be strings.
   query = {
+    # cidr_block          = local.vpc_cidr_block
     cidr_block          = var.vpc.cidr_block
-    exclude_cidr_blocks = try(join(" ", var.vpc.subnet_cidr_block), "")
-    prefix_lengths      = join(" ", local.prefix_lengths)
+    exclude_cidr_blocks = join(" ", local.subnet_cidr_blocks)
+    # exclude_cidr_blocks = join(" ", flatten(random_shuffle.allocated_cidrs.*.result))
+    prefix_lengths = join(" ", local.prefix_lengths)
   }
 }
 
@@ -33,6 +35,8 @@ variable "subnets" {
 
     availability_zone    = optional(string)
     availability_zone_id = optional(string)
+
+    cidr_block = optional(string)
 
     map_public_ip_on_launch = optional(bool) # Default: false
 
@@ -53,7 +57,7 @@ locals {
   ]
 
   cidr_blocks = flatten([for v in data.external.cidr.*.result.cidr_blocks : split(" ", v)])
-
+  # cidr_blocks = [for v in sort(flatten(random_shuffle.allocated_cidrs.*.result)) : split(":", v)[1]]
 
   subnets = {
     for i in range(length(local.subnets_keys)) : local.subnets_keys[i] => {
@@ -66,7 +70,10 @@ locals {
 
 
   inbound_sliced = { for k in local.subnets_keys : k => ([
-    for v in concat(formatlist("allow * %s", local.cidr_blocks), try(var.subnets[k].network_acl_inbound_rules, [])) : split(" ", lower(replace(v, "/\\s+/", " ")))
+    for v in concat(
+      formatlist("allow * %s", local.cidr_blocks),
+      var.subnets[k].network_acl_inbound_rules != null ? var.subnets[k].network_acl_inbound_rules : []
+    ) : split(" ", lower(replace(v, "/\\s+/", " ")))
   ]) } # map(list(list(string)))
 
   inbound_expanded = { for k, v in local.inbound_sliced : k => flatten([
@@ -96,7 +103,10 @@ locals {
 
   # for v in try(var.subnets[k].network_acl_outbound_rules, []) : split(" ", lower(replace(v, "/\\s+/", " ")))
   outbound_sliced = { for k in local.subnets_keys : k => ([
-    for v in concat(formatlist("allow * %s", local.cidr_blocks), try(var.subnets[k].network_acl_outbound_rules, [])) : split(" ", lower(replace(v, "/\\s+/", " ")))
+    for v in concat(
+      formatlist("allow * %s", local.cidr_blocks),
+      var.subnets[k].network_acl_outbound_rules != null ? var.subnets[k].network_acl_outbound_rules : []
+    ) : split(" ", lower(replace(v, "/\\s+/", " ")))
   ]) } # map(list(list(string)))
 
   outbound_expanded = { for k, v in local.outbound_sliced : k => flatten([
@@ -123,19 +133,3 @@ locals {
   } # map(list(string))
 
 }
-
-
-# #https://registry.terraform.io/providers/skeggse/metadata/latest/docs/resources/value
-# resource "metadata_value" "subnet" {
-#   ##################################
-#   for_each = local.subnets
-
-#   update = true
-#   #allow tcp 10.103.9.16/28 1521 1522
-#   inputs = {
-#     vpc_id                  = var.vpc.id
-#     cidr_block              = each.value.cidr_block
-#     availability_zone       = each.value.availability_zone
-#     map_public_ip_on_launch = each.value.map_public_ip_on_launch
-#   }
-# }

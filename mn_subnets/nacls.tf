@@ -3,7 +3,7 @@ resource "aws_network_acl" "this" {
   #################################
   for_each = local.subnets
 
-  vpc_id = var.vpc.id
+  vpc_id = local.vpc_id
 
   subnet_ids = [aws_subnet.this[each.key].id]
 

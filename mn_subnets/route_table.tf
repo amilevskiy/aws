@@ -3,7 +3,7 @@ resource "aws_route_table" "this" {
   #################################
   count = local.enable_route_table
 
-  vpc_id = var.vpc.id
+  vpc_id = local.vpc_id
 
   propagating_vgws = var.route_table.propagating_vgws
 
@@ -27,11 +27,12 @@ resource "aws_route_table_association" "this" {
 #https://www.terraform.io/docs/providers/aws/r/vpc_endpoint_route_table_association.html
 resource "aws_vpc_endpoint_route_table_association" "this" {
   ##########################################################
-  count = local.enable_route_table
+  for_each = local.enable_route_table > 0 && var.vpc_endpoint_type_gateway_ids != null ? var.vpc_endpoint_type_gateway_ids : {}
 
   route_table_id  = aws_route_table.this[0].id
-  vpc_endpoint_id = var.vpc_endpoint_id
+  vpc_endpoint_id = each.value
 }
+
 
 
 #https://www.terraform.io/docs/providers/aws/r/route.html
