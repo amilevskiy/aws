@@ -1,82 +1,52 @@
-variable "security_group" {
-  type = object({
-    name        = optional(string)
+variable "security_groups" {
+  type = map(object({
     description = optional(string)
-
-    vpc_id                = optional(string)
-    enable_rule_embedding = optional(bool)
 
     ingress = optional(list(string))
     egress  = optional(list(string))
-
-    timeouts = optional(object({
-      create = optional(string)
-      delete = optional(string)
-    }))
-  })
+  }))
 
   default = null
 }
 
 locals {
-  enable_sg = var.enable && var.security_group != null ? var.instance != null ? (
-    var.instance.vpc_security_group_ids != null
-  ) ? var.instance.vpc_security_group_ids != "" ? 0 : 1 : 1 : 1 : 0
+  security_groups = var.enable && var.security_groups != null ? {
+    for k, v in var.security_groups : k => {
+      description = var.security_groups[k].description
+      ingress     = [for vv in v.ingress : split(" ", replace(vv, "/\\s+/", " "))]
+      egress      = [for vv in v.egress : split(" ", replace(vv, "/\\s+/", " "))]
+    }
+  } : {}
 
-  security_group_name = local.enable_sg > 0 ? var.security_group.name != null ? (
-    var.security_group.name
-  ) : "${local.instance_name}${module.const.delimiter}${module.const.sg_suffix}" : null
+  inbound_sg_rules = var.enable_security_group_rule_embedding ? {} : merge(flatten([
+    for k, v in local.security_groups : { for vv in v.ingress : "${k}:${join(" ", slice(concat(
+      ["ingress"], vv, ["*", "*", "*", "*"]
+    ), 0, 5))}" => vv }
+  ])...)
 
-  enable_rule_embedding = (local.enable_sg > 0
-    ? var.security_group.enable_rule_embedding != null
-    ? var.security_group.enable_rule_embedding
-  : false : false)
+  outbound_sg_rules = var.enable_security_group_rule_embedding ? {} : merge(flatten([
+    for k, v in local.security_groups : { for vv in v.egress : "${k}:${join(" ", slice(concat(
+      ["egress"], vv, ["*", "*", "*", "*"]
+    ), 0, 5))}" => vv }
+  ])...)
 
-  # 0   1                       2  3   4
-  # tcp 10.1.1.1/20,10.2.1.2/20 80 443 description name
-  security_group_rules = local.enable_sg > 0 && !local.enable_rule_embedding ? merge(
-    var.security_group.ingress != null ? {
-      for i, v in var.security_group.ingress : replace(replace(
-        "${v} * * * *",
-        "/^\\s*(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+).*/",
-        "ingress $1 $2 $3 $4"
-      ), "/[ *]+$/", "") => split(" ", replace(v, "/\\s+/", " "))
-    } : {},
-    var.security_group.egress != null ? {
-      for i, v in var.security_group.egress : replace(replace(
-        "${v} * * * *",
-        "/^\\s*(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+).*/",
-        "egress $1 $2 $3 $4"
-      ), "/[ *]+$/", "") => split(" ", replace(v, "/\\s+/", " "))
-  } : {}) : {}
-
-  security_group_ingress_rules = (local.enable_sg > 0 && local.enable_rule_embedding
-    ? var.security_group.ingress != null
-    ? [for i, v in var.security_group.ingress : split(" ", replace(v, "/\\s+/", " "))]
-  : [] : [])
-
-  security_group_egress_rules = (local.enable_sg > 0 && local.enable_rule_embedding
-    ? var.security_group.egress != null
-    ? [for i, v in var.security_group.egress : split(" ", replace(v, "/\\s+/", " "))]
-  : [] : [])
+  security_group_rules = merge(local.inbound_sg_rules, local.outbound_sg_rules)
 }
 
 #https://www.terraform.io/docs/providers/aws/r/security_group.html
 resource "aws_security_group" "this" {
   ####################################
-  count = local.enable_sg
+  for_each = local.security_groups
 
-  name_prefix = "${local.security_group_name}${module.const.delimiter}"
-  description = var.security_group.description != null ? (
-    var.security_group.description
-  ) : "Traffic for ${local.instance_name}"
+  name        = each.key
+  description = "${each.key} for ${var.vpc_id}"
 
-  vpc_id = var.security_group.vpc_id
+  vpc_id = var.vpc_id
 
   # 0   1                       2  3   4
   # tcp 10.1.1.1/20,10.2.1.2/20 80 443 description
   dynamic "ingress" {
-    for_each = local.security_group_ingress_rules != null ? local.security_group_ingress_rules : []
+    for_each = var.enable_security_group_rule_embedding && each.value.ingress != null ? each.value.ingress : []
     content {
       protocol = can(ingress.value[0]) ? ingress.value[0] != "*" ? ingress.value[0] : "-1" : "-1"
 
@@ -99,7 +69,7 @@ resource "aws_security_group" "this" {
   }
 
   dynamic "egress" {
-    for_each = local.security_group_egress_rules != null ? local.security_group_egress_rules : []
+    for_each = var.enable_security_group_rule_embedding && each.value.egress != null ? each.value.egress : []
     content {
       protocol = can(egress.value[0]) ? egress.value[0] != "*" ? egress.value[0] : "-1" : "-1"
 
@@ -121,20 +91,8 @@ resource "aws_security_group" "this" {
     }
   }
 
-  dynamic "timeouts" {
-    for_each = var.security_group.timeouts != null ? [var.security_group.timeouts] : []
-    content {
-      create = timeouts.value.create
-      delete = timeouts.value.delete
-    }
-  }
-
   tags = {
-    Name = local.security_group_name
-  }
-
-  lifecycle {
-    create_before_destroy = true
+    Name = each.key
   }
 }
 
@@ -143,11 +101,12 @@ resource "aws_security_group_rule" "this" {
   #########################################
   for_each = local.security_group_rules
 
-  security_group_id = aws_security_group.this[0].id
+  security_group_id = aws_security_group.this[split(":", each.key)[0]].id
 
-  # 0   1                       2  3   4
-  # tcp 10.1.1.1/20,10.2.1.2/20 80 443 description name
-  type     = split(" ", each.key)[0]
+  # 0       1   2                       3  4   5
+  # ingress tcp 10.1.1.1/20,10.2.1.2/20 80 443 description name
+  type = replace(each.key, "/.*:(\\S+).*/", "$1")
+
   protocol = can(each.value[0]) ? each.value[0] != "*" ? each.value[0] : "-1" : "-1"
 
   self                     = can(regex("^(?i)self$", each.value[1])) ? true : null

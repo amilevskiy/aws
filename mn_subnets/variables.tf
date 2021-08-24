@@ -42,3 +42,13 @@ variable "map_public_ip_on_launch" {
   type    = bool
   default = null
 }
+
+variable "enable_network_acl_rule_embedding" {
+  type    = bool
+  default = false
+}
+
+variable "enable_security_group_rule_embedding" {
+  type    = bool
+  default = false
+}
