@@ -46,30 +46,34 @@ resource "aws_vpc_dhcp_options" "this" {
   #null -> ["AmazonProvidedDNS"]
   #[] -> null
   #["10.1.2.3", "10.2.3.4"] -> ["10.1.2.3", "10.2.3.4"]
-  domain_name_servers = var.dhcp_options.domain_name_servers != null ? length(
-    var.dhcp_options.domain_name
-  ) > 0 ? var.dhcp_options.domain_name_servers : null : ["AmazonProvidedDNS"]
+  domain_name_servers = (var.dhcp_options.domain_name_servers != null
+    ? length(var.dhcp_options.domain_name_servers) > 0
+    ? var.dhcp_options.domain_name_servers
+  : null : ["AmazonProvidedDNS"])
 
   #null -> ["169.254.169.123"]
   #[] -> null
   #["10.1.2.3", "10.2.3.4"] -> ["10.1.2.3", "10.2.3.4"]
-  ntp_servers = var.dhcp_options.ntp_servers != null ? length(
-    var.dhcp_options.ntp_servers
-  ) > 0 ? var.dhcp_options.ntp_servers : null : ["169.254.169.123"]
+  ntp_servers = (var.dhcp_options.ntp_servers != null
+    ? length(var.dhcp_options.ntp_servers) > 0
+    ? var.dhcp_options.ntp_servers
+  : null : ["169.254.169.123"])
 
   #null -> ["127.0.0.1"]
   #[] -> null
   #["10.1.2.3", "10.2.3.4"] -> ["10.1.2.3", "10.2.3.4"]
-  netbios_name_servers = var.dhcp_options.netbios_name_servers != null ? length(
-    var.dhcp_options.netbios_name_servers
-  ) > 0 ? var.dhcp_options.netbios_name_servers : null : ["127.0.0.1"]
+  netbios_name_servers = (var.dhcp_options.netbios_name_servers != null
+    ? length(var.dhcp_options.netbios_name_servers) > 0
+    ? var.dhcp_options.netbios_name_servers
+  : null : ["127.0.0.1"])
 
   #null -> 2
   #0 -> null
   #1,2,4,8 -> 1,2,4,8
-  netbios_node_type = var.dhcp_options.netbios_node_type != null ? (
-    var.dhcp_options.netbios_node_type > 0 ? var.dhcp_options.netbios_node_type : null
-  ) : 2
+  netbios_node_type = (var.dhcp_options.netbios_node_type != null
+    ? var.dhcp_options.netbios_node_type > 0
+    ? var.dhcp_options.netbios_node_type
+  : null : 2)
 
   tags = merge(local.tags, {
     Name = local.dhcp_options_name

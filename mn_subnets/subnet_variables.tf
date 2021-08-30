@@ -25,7 +25,7 @@ locals {
 
   inbound_sliced = { for k in local.subnet_keys : k => ([
     for v in concat(
-      formatlist("allow * %s", local.cidr_blocks),
+      formatlist("allow * %s", setsubtract(local.cidr_blocks, [var.subnets[k].cidr_block])),
       var.subnets[k].network_acl_inbound_rules != null ? var.subnets[k].network_acl_inbound_rules : []
     ) : split(" ", lower(replace(v, "/\\s+/", " ")))
   ]) } # map(list(list(string)))
@@ -57,7 +57,7 @@ locals {
   # for v in try(var.subnets[k].network_acl_outbound_rules, []) : split(" ", lower(replace(v, "/\\s+/", " ")))
   outbound_sliced = { for k in local.subnet_keys : k => ([
     for v in concat(
-      formatlist("allow * %s", local.cidr_blocks),
+      formatlist("allow * %s", setsubtract(local.cidr_blocks, [var.subnets[k].cidr_block])),
       var.subnets[k].network_acl_outbound_rules != null ? var.subnets[k].network_acl_outbound_rules : []
     ) : split(" ", lower(replace(v, "/\\s+/", " ")))
   ]) } # map(list(list(string)))
