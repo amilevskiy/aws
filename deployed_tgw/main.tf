@@ -74,3 +74,4 @@ resource "aws_ram_resource_share_accepter" "follower" {
 
   depends_on = [aws_ram_resource_association.leader]
 }
+

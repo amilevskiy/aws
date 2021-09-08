@@ -38,3 +38,4 @@ locals {
     for k, v in var.routes : [for list in setproduct([k], v) : join(":", list)] if can(regex("^tgw-attach-", k))
   ]) : [])
 }
+
