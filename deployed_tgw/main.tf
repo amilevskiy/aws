@@ -1,7 +1,7 @@
 ################
 module "const" {
   ##############
-  source = "github.com/amilevskiy/const?ref=v0.1.10"
+  source = "github.com/amilevskiy/const?ref=v0.1.11"
 }
 
 #https://www.terraform.io/docs/providers/aws/r/ram_resource_share.html
@@ -13,16 +13,20 @@ resource "aws_ram_resource_share" "leader" {
 
   name = coalesce(
     var.leader_resource_share_name,
-    "${local.prefix}${module.const.delimiter}${module.const.ram_suffix}"
-  )
+    join(module.const.delimiter, [
+      local.prefix,
+      module.const.ram_suffix,
+  ]))
 
   allow_external_principals = var.leader_allow_external_principals
 
   tags = merge(local.tags, {
     Name = coalesce(
       var.leader_resource_share_tag_name,
-      "${local.prefix}${module.const.delimiter}${module.const.ram_suffix}"
-    )
+      join(module.const.delimiter, [
+        local.prefix,
+        module.const.ram_suffix,
+    ]))
   })
 }
 
@@ -35,7 +39,7 @@ resource "aws_ram_resource_association" "leader" {
   count = local.enable
 
   #arn:aws:ec2:us-east-1:318068638372:transit-gateway/tgw-06773499e1535c4e9
-  resource_arn       = coalescelist(data.aws_ec2_transit_gateway.leader.*.arn, [var.leader_resource_arn])[0]
+  resource_arn       = try(data.aws_ec2_transit_gateway.leader[0].arn, var.leader_resource_arn)
   resource_share_arn = aws_ram_resource_share.leader[0].arn
 }
 
@@ -46,7 +50,7 @@ resource "aws_ram_principal_association" "leader" {
 
   count = local.enable
 
-  principal          = coalescelist(data.aws_caller_identity.follower.*.account_id, [var.follower_principal])[0]
+  principal          = try(data.aws_caller_identity.follower[0].account_id, var.follower_principal)
   resource_share_arn = aws_ram_resource_share.leader[0].arn
 }
 

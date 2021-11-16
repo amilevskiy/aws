@@ -31,8 +31,10 @@ locals {
 
   dhcp_options_name = var.dhcp_options != null ? coalesce(
     var.dhcp_options.name,
-    "${local.prefix}${module.const.delimiter}${module.const.dhcp_options_suffix}"
-  ) : null
+    join(module.const.delimiter, [
+      local.prefix,
+      module.const.dhcp_options_suffix,
+  ])) : null
 }
 
 

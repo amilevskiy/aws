@@ -81,7 +81,7 @@ resource "aws_iam_role_policy" "this" {
 
   role = aws_iam_role.this[0].name
 
-  policy = coalesce(local.iam_inline_policy_document, data.aws_iam_policy_document.inline[0].json)
+  policy = try(data.aws_iam_policy_document.inline[0].json, local.iam_inline_policy_document)
 
   lifecycle {
     create_before_destroy = true

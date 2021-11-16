@@ -30,8 +30,10 @@ locals {
   #!! doesn't work: try(var.vpc.name, "${local.prefix}${module.const.vpc_suffix}")
   vpc_name = var.vpc != null ? coalesce(
     var.vpc.name,
-    "${local.prefix}${module.const.delimiter}${module.const.vpc_suffix}"
-  ) : null
+    join(module.const.delimiter, [
+      local.prefix,
+      module.const.vpc_suffix,
+  ])) : null
 }
 
 #https://www.terraform.io/docs/providers/aws/r/vpc.html

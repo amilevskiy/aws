@@ -11,8 +11,10 @@ locals {
 
   internet_gateway_name = var.internet_gateway != null ? coalesce(
     var.internet_gateway.name,
-    "${local.prefix}${module.const.delimiter}${module.const.igw_suffix}"
-  ) : null
+    join(module.const.delimiter, [
+      local.prefix,
+      module.const.igw_suffix,
+  ])) : null
 }
 
 #https://www.terraform.io/docs/providers/aws/r/internet_gateway.html
