@@ -58,10 +58,6 @@ variable "backend_file" {
   description = "The name of local file that will plan storing configuration (optional)."
 }
 
-variable "regexp_account_id_in_path" {
-  default = "/.*\\/([0-9]{12}\\/)/"
-}
-
 variable "default_directory_prefix" {
   default = "010"
 }

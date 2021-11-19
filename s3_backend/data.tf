@@ -74,13 +74,13 @@ locals {
     skip_metadata_api_check     = var.skip_metadata_api_check
   }
 
-  is_path_match = can(regex(var.regexp_account_id_in_path, abspath(path.root)))
+  is_path_match = can(regex("\\/[0-9]{12}\\/", abspath(path.root)))
 
   key_suffix = coalesce(var.key_suffix, (local.is_path_match
-    ? replace(abspath(path.root), var.regexp_account_id_in_path, "$1")
+    ? replace(abspath(path.root), "/.*\\/([0-9]{12}\\/)/", "$1")
     : join(module.const.path_separator, compact(concat(
       data.aws_caller_identity.this.*.account_id,
-      [for v in data.aws_region.this : replace(v.name, "^([^-]+)-([^-]).*-([^-]+)$", "$1$2$3")],
+      [for v in data.aws_region.this : replace(v.name, "/^([^-]+)-([^-]).+-([^-]+)$/", "$1$2$3")],
       [replace(abspath(path.root), "/.*\\//", "")],
   )))))
 
