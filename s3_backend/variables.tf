@@ -3,16 +3,6 @@ variable "enable" {
   description = "Flag to enable module (optional)."
 }
 
-variable "current_account_id" {
-  default     = ""
-  description = "The current account_id from which running (optional)."
-}
-
-variable "state_account_id" {
-  default     = "226896994788"
-  description = "The account_id where stored in S3 bootstrap state (optional)."
-}
-
 variable "region" {
   default     = ""
   description = "The region where stored in S3 bootstrap state (optional)."
@@ -26,6 +16,11 @@ variable "profile" {
 variable "role_arn" {
   default     = ""
   description = "The IAM role to access to S3 bootstrap state (optional)."
+}
+
+variable "backend_account_id" {
+  default     = "226896994788"
+  description = "The account_id where stored in S3 bootstrap state (optional)."
 }
 
 variable "bucket" {
@@ -63,12 +58,14 @@ variable "backend_file" {
   description = "The name of local file that will plan storing configuration (optional)."
 }
 
-variable "backend_directory_permission" {
-  default     = "0755"
-  description = "https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file#directory_permission"
+variable "regexp_account_id_in_path" {
+  default = "/.*\\/([0-9]{12}\\/)/"
 }
 
-variable "backend_file_permission" {
-  default     = "0644"
-  description = "https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file#file_permission"
+variable "default_directory_prefix" {
+  default = "010"
+}
+
+variable "default_bucket_suffix" {
+  default = "networking"
 }
