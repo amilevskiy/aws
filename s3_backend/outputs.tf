@@ -21,7 +21,7 @@ output "key_suffix" {
 output "local_file" {
   ###################
   value = {
-    filename = local.backend_file
+    filename = local.backend_filename
     content  = join("", data.template_file.this.*.rendered)
   }
 }

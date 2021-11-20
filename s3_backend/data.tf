@@ -36,7 +36,7 @@ data "template_file" "this" {
 locals {
   ######
 
-  enable = var.enable ? 1 : 0
+  enable = var.enable && !fileexists(local.backend_filename) ? 1 : 0
 
   region = coalesce(var.region, module.const.regions.primary.name)
 
@@ -84,8 +84,5 @@ locals {
       [replace(abspath(path.root), "/.*\\//", "")],
   )))))
 
-  backend_file = coalesce(var.backend_file, join(module.const.path_separator, [
-    path.root,
-    module.const.backend_tf,
-  ]))
+  backend_filename = coalesce(var.backend_filename, module.const.backend_tf)
 }

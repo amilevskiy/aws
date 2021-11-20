@@ -1,5 +1,5 @@
 variable "enable" {
-  default     = false
+  default     = true
   description = "Flag to enable module (optional)."
 }
 
@@ -53,7 +53,7 @@ variable "key_suffix" {
   description = "S3 path to substitute in backend template (optional)."
 }
 
-variable "backend_file" {
+variable "backend_filename" {
   default     = ""
   description = "The name of local file that will plan storing configuration (optional)."
 }
