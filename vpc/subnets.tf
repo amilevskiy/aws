@@ -30,6 +30,8 @@ variable "subnets" {
       outpost_arn                     = optional(string)
 
       propagating_vgws = optional(list(string))
+
+      tags = optional(map(string))
     }))
 
     lb = optional(object({
@@ -48,6 +50,8 @@ variable "subnets" {
       outpost_arn                     = optional(string)
 
       propagating_vgws = optional(list(string))
+
+      tags = optional(map(string))
     }))
 
     k8s = optional(object({
@@ -66,6 +70,8 @@ variable "subnets" {
       outpost_arn                     = optional(string)
 
       propagating_vgws = optional(list(string))
+
+      tags = optional(map(string))
     }))
 
     misc = optional(object({
@@ -84,6 +90,8 @@ variable "subnets" {
       outpost_arn                     = optional(string)
 
       propagating_vgws = optional(list(string))
+
+      tags = optional(map(string))
     }))
 
     secured = optional(object({
@@ -102,6 +110,8 @@ variable "subnets" {
       outpost_arn                     = optional(string)
 
       propagating_vgws = optional(list(string))
+
+      tags = optional(map(string))
 
       # nice to do: network_acl_cidr_blocks = optional(list(string))
       network_acl_cidr_block = optional(string)

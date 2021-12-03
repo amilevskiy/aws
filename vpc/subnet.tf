@@ -47,20 +47,20 @@ resource "aws_subnet" "this" {
     var.subnets[each.value.subnet].outpost_arn
   ) : var.subnets.outpost_arn != null ? var.subnets.outpost_arn : null
 
-  tags = merge(local.tags, {
-    Name = join(module.const.delimiter, [
-      coalesce(
-        var.subnets[each.value.subnet].name_prefix,
-        var.subnets.name_prefix,
-        join(module.const.delimiter, [
-          local.prefix,
-          var.label[each.value.subnet]
-        ])
-      ),
-      substr(each.key, -1, 1),
-      module.const.subnet_suffix,
-    ])
-  })
+  tags = merge(local.tags, var.subnets[each.value.subnet].tags != null
+    ? var.subnets[each.value.subnet].tags : {}, {
+      Name = join(module.const.delimiter, [
+        coalesce(
+          var.subnets[each.value.subnet].name_prefix,
+          var.subnets.name_prefix,
+          join(module.const.delimiter, [
+            local.prefix,
+            var.label[each.value.subnet]
+          ])
+        ),
+        substr(each.key, -1, 1),
+        module.const.subnet_suffix,
+  ]) })
 
   dynamic "timeouts" {
     for_each = var.subnets.timeouts != null ? [var.subnets.timeouts] : []
