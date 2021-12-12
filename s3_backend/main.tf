@@ -17,6 +17,7 @@ resource "null_resource" "backend" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
     command = "test -e '${self.triggers.filename}' || echo '${self.triggers.content}' >'${self.triggers.filename}'"
   }
 }

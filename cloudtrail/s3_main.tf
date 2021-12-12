@@ -1,0 +1,194 @@
+locals {
+  main_bucket = join(module.const.delimiter, [coalesce(var.name, join(module.const.delimiter, concat(
+    [module.const.prefix],
+    [for k, v in module.const.regions : v.mn_code if v.name == local.region_main],
+    compact([module.const.mn_code, var.default_s3_bucket_suffix, var.name_suffix.main]),
+  )))])
+
+}
+
+#https://www.terraform.io/docs/providers/aws/r/s3_bucket_public_access_block.html
+resource "aws_s3_bucket_public_access_block" "main" {
+  ###################################################
+  provider = aws.main
+
+  count = local.enable
+
+  bucket = aws_s3_bucket.main[count.index].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+#https://www.terraform.io/docs/providers/aws/r/s3_bucket.html
+resource "aws_s3_bucket" "main" {
+  ###############################
+  provider = aws.main
+
+  count = local.enable
+
+  bucket        = local.main_bucket
+  acl           = module.const.s3_canned_acl_private
+  force_destroy = true
+
+  logging {
+    target_bucket = aws_s3_bucket.main_log[count.index].id
+    target_prefix = "${local.account_id}/"
+  }
+
+  versioning {
+    enabled = true
+  }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+        #sse_algorithm = var.enable ? "aws:kms" : "AES256"
+        # kms_master_key_id = join("", aws_kms_key.main.*.arn)
+      }
+    }
+  }
+
+  replication_configuration {
+    role = aws_iam_role.replica[count.index].arn
+
+    rules {
+      id     = "replica_configuration"
+      prefix = ""
+      status = "Enabled"
+
+      #source_selection_criteria {
+      #  sse_kms_encrypted_objects {
+      #    enabled = true
+      #  }
+      #}
+
+      destination {
+        bucket        = aws_s3_bucket.replica[count.index].arn
+        storage_class = "STANDARD_IA"
+        # replica_kms_key_id = aws_kms_key.replica[count.index].arn
+      }
+    }
+  }
+
+  lifecycle_rule {
+    id                                     = module.const.s3_aws_logs_prefix
+    prefix                                 = "${module.const.s3_aws_logs_prefix}/"
+    enabled                                = true
+    abort_incomplete_multipart_upload_days = 1
+
+    #AbortIncompleteMultipartUpload cannot be specified with Tags
+    #tags = {
+    #  Name        = "${local.prefix}${module.const.s3_lifecycle_suffix}"
+    #  Environment = var.env
+    #  Terraform   = "true"
+    #}
+
+    expiration {
+      days = 3
+    }
+
+    noncurrent_version_expiration {
+      days = 3
+    }
+  }
+
+  tags = merge(local.tags, {
+    Name = "${local.main_bucket}${module.const.delimiter}${module.const.s3_suffix}"
+  })
+}
+
+#https://www.terraform.io/docs/providers/aws/r/s3_bucket_policy.html
+resource "aws_s3_bucket_policy" "main" {
+  ######################################
+  provider = aws.main
+
+  count = local.enable
+
+  bucket = aws_s3_bucket.main[count.index].id
+  policy = data.aws_iam_policy_document.main[count.index].json
+
+  depends_on = [aws_s3_bucket_public_access_block.main]
+}
+
+#https://www.terraform.io/docs/providers/aws/d/iam_policy_document.html
+data "aws_iam_policy_document" "main" {
+  #####################################
+  count = local.enable
+
+  #https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy.html#granting-access-in-another-account
+  statement {
+    sid = "AllowBucketAclCheckAndList"
+    actions = [
+      "s3:GetBucketAcl",
+      "s3:ListBucket",
+    ]
+    resources = aws_s3_bucket.main.*.arn
+
+    principals {
+      type = "Service"
+      identifiers = [
+        "cloudtrail.amazonaws.com",
+        "delivery.logs.amazonaws.com",
+      ]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = [true]
+    }
+  }
+
+  #data.aws_caller_identity.this.*.account_id
+  #    aws_s3_bucket.main.*.arn,
+  statement {
+    sid     = "AllowBucketPut"
+    actions = ["s3:PutObject"]
+    resources = formatlist("%s/%s/%s/*",
+      aws_s3_bucket.main[count.index].arn,
+      module.const.s3_aws_logs_prefix,
+      [local.account_id]
+    )
+
+    principals {
+      type = "Service"
+      identifiers = [
+        "cloudtrail.amazonaws.com",
+        "delivery.logs.amazonaws.com",
+      ]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-acl"
+      values   = ["bucket-owner-full-control"]
+    }
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = [true]
+    }
+  }
+
+  statement {
+    sid       = "TlsRequestsOnlyPolicy"
+    effect    = "Deny"
+    actions   = ["s3:*"]
+    resources = concat(aws_s3_bucket.main.*.arn, formatlist("%s/*", aws_s3_bucket.main.*.arn))
+
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = [false]
+    }
+  }
+}
