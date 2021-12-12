@@ -33,8 +33,11 @@ locals {
 
   account_id = var.account_id != "" ? var.account_id : join("", data.aws_caller_identity.this.*.account_id)
 
-  region_main    = join("", data.aws_region.main.*.name)
-  region_replica = join("", data.aws_region.replica.*.name)
+  region_main       = join("", data.aws_region.main.*.name)
+  region_main_short = replace(local.region_main, "/^([^-]+)-([^-]).+-([^-]+)$/", "$1$2$3")
+
+  region_replica       = join("", data.aws_region.replica.*.name)
+  region_replica_short = replace(local.region_replica, "/^([^-]+)-([^-]).+-([^-]+)$/", "$1$2$3")
 
   # name = coalesce(var.name, join(module.const.delimiter, concat(
   #   [module.const.prefix],
