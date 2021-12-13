@@ -3,126 +3,62 @@ resource "aws_kms_key" "this" {
   #############################
   count = local.enable
 
-  description              = var.description
-  key_usage                = var.key_usage
-  customer_master_key_spec = var.customer_master_key_spec
+  is_enabled = var.enable
+
+  description                        = var.description
+  key_usage                          = var.key_usage
+  customer_master_key_spec           = var.customer_master_key_spec
+  bypass_policy_lockout_safety_check = var.bypass_policy_lockout_safety_check
+  deletion_window_in_days            = var.deletion_window_in_days
+  enable_key_rotation                = var.enable_key_rotation
+  multi_region                       = var.multi_region
 
   policy = var.policy #data.aws_iam_policy_document.this[count.index].json
 
-  bypass_policy_lockout_safety_check = var.bypass_policy_lockout_safety_check
-  deletion_window_in_days            = var.deletion_window_in_days
-
-  is_enabled = var.enable
-
-  enable_key_rotation = var.enable_key_rotation
-  multi_region        = var.multi_region
-
   tags = merge(local.tags, {
-    #Name = "${local.prefix}${module.const.kms_suffix}"
+    Name = (can(coalesce(var.name_prefix))
+      ? "${var.name_prefix}${module.const.kms_suffix}"
+    : null)
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/d/iam_policy_document.html
-# data "aws_iam_policy_document" "this" {
-#   #####################################
-#   count = local.enable
+#https://www.terraform.io/docs/providers/aws/r/kms_alias.html
+resource "aws_kms_alias" "main" {
+  ###############################
+  count = can(coalesce(var.name_prefix)) ? local.enable : 0
 
-#   dynamic "statement" {
-#     for_each = var.policy != null ? var.policy : {}
-#     content {
-#       sid       = statement.key
-#       effect    = statement.value.effect != null ? statement.value.effect : null
-#       actions   = statement.value.actions != null ? statement.value.actions : ["*"]
-#       resources = statement.value.resources != null ? statement.value.resources : ["*"]
+  name_prefix   = var.name_prefix
+  target_key_id = aws_kms_key.this[count.index].id
+}
 
-#       dynamic "principals" {
-#         for_each = statement.value.principals != null ? statement.value.principals : {}
-#         content {
-#           type        = principals.key
-#           identifiers = principals.value
-#         }
-#       }
+#https://www.terraform.io/docs/providers/aws/r/kms_replica_key.html
+resource "aws_kms_replica_key" "this" {
+  #####################################
+  provider = aws.replica
 
-#       dynamic "condition" {
-#         for_each = statement.value.condition != null ? statement.value.condition : {}
-#         content {
-#           test     = condition.key
-#           variable = condition.value.variable
-#           values   = condition.value.values
-#         }
-#       }
-#     }
-#   }
+  count = coalesce(var.multi_region, false) ? local.enable : 0
 
-#   statement {
-#     sid       = "AllowIamUser"
-#     actions   = ["kms:*"]
-#     resources = ["*"]
+  primary_key_arn                    = aws_kms_key.this[count.index].arn
+  description                        = aws_kms_key.this[count.index].description
+  deletion_window_in_days            = aws_kms_key.this[count.index].deletion_window_in_days
+  bypass_policy_lockout_safety_check = aws_kms_key.this[count.index].bypass_policy_lockout_safety_check
 
-#     principals {
-#       type        = "AWS"
-#       identifiers = ["arn:aws:iam::${local.account_id}:root"]
-#     }
-#   }
+  policy = var.replica_policy
 
-#   statement {
-#     sid       = "AllowCloudTrailEncrypt"
-#     actions   = ["kms:GenerateDataKey*"]
-#     resources = ["*"]
+  tags = merge(local.tags, {
+    Name = (can(coalesce(var.name_prefix))
+      ? "${var.name_prefix}${var.replica_word}${module.const.delimiter}${module.const.kms_suffix}"
+    : null)
+  })
+}
 
-#     principals {
-#       type        = "Service"
-#       identifiers = ["cloudtrail.amazonaws.com"]
-#     }
+#https://www.terraform.io/docs/providers/aws/r/kms_alias.html
+resource "aws_kms_alias" "replica" {
+  ##################################
+  provider = aws.replica
 
-#     condition {
-#       test     = "StringLike"
-#       variable = "kms:EncryptionContext:aws:cloudtrail:arn"
-#       values   = ["arn:aws:cloudtrail:*:${local.account_id}:trail/*"]
-#     }
-#   }
+  count = coalesce(var.multi_region, false) && can(coalesce(var.name_prefix)) ? local.enable : 0
 
-#   statement {
-#     sid = "AllowCloudWatchLogsAnyGroup"
-
-#     actions = [
-#       "kms:Encrypt*",
-#       "kms:Decrypt*",
-#       "kms:ReEncrypt*",
-#       "kms:GenerateDataKey*",
-#       "kms:Describe*"
-#     ]
-
-#     resources = ["*"]
-
-#     principals {
-#       type        = "Service"
-#       identifiers = ["logs.${local.region}.amazonaws.com"]
-#     }
-
-#     condition {
-#       test     = "ArnEquals"
-#       variable = "kms:EncryptionContext:aws:logs:arn"
-#       values   = ["arn:aws:logs:${local.region}:${local.account_id}:*"]
-#     }
-#   }
-
-#   statement {
-#     sid = "AllowVpcFlowLogs"
-
-#     actions = [
-#       "kms:Encrypt*",
-#       "kms:Decrypt*",
-#       "kms:ReEncrypt*",
-#       "kms:GenerateDataKey*",
-#       "kms:Describe*"
-#     ]
-
-#     resources = ["*"]
-
-#     principals {
-#       type        = "Service"
-#       identifiers = ["delivery.logs.amazonaws.com"]
-#     }
-#   }
-# }
+  name_prefix   = "${var.name_prefix}${var.replica_word}${module.const.delimiter}"
+  target_key_id = aws_kms_replica_key.this[count.index].id
+}

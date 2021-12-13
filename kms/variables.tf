@@ -10,19 +10,6 @@ variable "enable" {
   description = "Destroy all module resources if false (optional)."
 }
 
-variable "name" {
-  default = ""
-}
-
-variable "account_id" {
-  default = ""
-
-  validation {
-    condition = can(regex("^([0-9]{12,}|)$", var.account_id))
-
-    error_message = "Invalid value of \"account_id\"."
-  }
-}
 
 variable "description" {
   type    = string
@@ -85,6 +72,19 @@ variable "multi_region" {
 }
 
 variable "policy" {
-  # type    = object(any)
-  # default = {}
+  type    = string
+  default = null
+}
+
+variable "name_prefix" {
+  default = ""
+}
+
+variable "replica_word" {
+  default = "replica"
+}
+
+variable "replica_policy" {
+  type    = string
+  default = null
 }

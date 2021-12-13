@@ -45,9 +45,8 @@ resource "aws_s3_bucket" "main" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-        #sse_algorithm = var.enable ? "aws:kms" : "AES256"
-        # kms_master_key_id = join("", aws_kms_key.main.*.arn)
+        sse_algorithm     = var.kms_main_key_arn != null ? "aws:kms" : "AES256"
+        kms_master_key_id = var.kms_main_key_arn
       }
     }
   }
@@ -60,16 +59,22 @@ resource "aws_s3_bucket" "main" {
       prefix = ""
       status = "Enabled"
 
-      #source_selection_criteria {
-      #  sse_kms_encrypted_objects {
-      #    enabled = true
-      #  }
-      #}
+      dynamic "source_selection_criteria" {
+        for_each = var.kms_main_key_arn != null ? [true] : []
+        content {
+          dynamic "sse_kms_encrypted_objects" {
+            for_each = [source_selection_criteria.key]
+            content {
+              enabled = sse_kms_encrypted_objects.key
+            }
+          }
+        }
+      }
 
       destination {
-        bucket        = aws_s3_bucket.replica[count.index].arn
-        storage_class = "STANDARD_IA"
-        # replica_kms_key_id = aws_kms_key.replica[count.index].arn
+        bucket             = aws_s3_bucket.replica[count.index].arn
+        storage_class      = "STANDARD_IA"
+        replica_kms_key_id = var.kms_replica_key_arn
       }
     }
   }
@@ -119,6 +124,29 @@ data "aws_iam_policy_document" "main" {
   #####################################
   count = local.enable
 
+  # dynamic "statement" {
+  #   for_each = var.s3_bucket_allowed_services != null ? [var.s3_bucket_allowed_services] : []
+  #   content {
+  #     sid = "AllowBucketAclCheckAndList"
+  #     actions = [
+  #       "s3:GetBucketAcl",
+  #       "s3:ListBucket",
+  #     ]
+  #     resources = aws_s3_bucket.main.*.arn
+
+  #     principals {
+  #       type        = "Service"
+  #       identifiers = statement.key
+  #     }
+
+  #     condition {
+  #       test     = "Bool"
+  #       variable = "aws:SecureTransport"
+  #       values   = [true]
+  #     }
+  #   }
+  # }
+
   #https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy.html#granting-access-in-another-account
   statement {
     sid = "AllowBucketAclCheckAndList"
@@ -129,11 +157,8 @@ data "aws_iam_policy_document" "main" {
     resources = aws_s3_bucket.main.*.arn
 
     principals {
-      type = "Service"
-      identifiers = [
-        "cloudtrail.amazonaws.com",
-        "delivery.logs.amazonaws.com",
-      ]
+      type        = "Service"
+      identifiers = var.s3_bucket_allowed_services
     }
 
     condition {
@@ -143,8 +168,6 @@ data "aws_iam_policy_document" "main" {
     }
   }
 
-  #data.aws_caller_identity.this.*.account_id
-  #    aws_s3_bucket.main.*.arn,
   statement {
     sid     = "AllowBucketPut"
     actions = ["s3:PutObject"]
@@ -155,11 +178,8 @@ data "aws_iam_policy_document" "main" {
     )
 
     principals {
-      type = "Service"
-      identifiers = [
-        "cloudtrail.amazonaws.com",
-        "delivery.logs.amazonaws.com",
-      ]
+      type        = "Service"
+      identifiers = var.s3_bucket_allowed_services
     }
 
     condition {

@@ -37,3 +37,23 @@ variable "account_id" {
 variable "default_s3_bucket_suffix" {
   default = ""
 }
+
+variable "kms_main_key_arn" {
+  type    = string
+  default = null
+}
+
+variable "kms_replica_key_arn" {
+  type    = string
+  default = null
+}
+
+variable "replica_role_permissions_boundary" {
+  type    = string
+  default = null
+}
+
+variable "s3_bucket_allowed_services" {
+  type    = list(string)
+  default = []
+}

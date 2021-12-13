@@ -57,16 +57,22 @@ resource "aws_s3_bucket" "main_log" {
       prefix = ""
       status = "Enabled"
 
-      #source_selection_criteria {
-      #  sse_kms_encrypted_objects {
-      #    enabled = true
-      #  }
-      #}
+      dynamic "source_selection_criteria" {
+        for_each = var.kms_main_key_arn != null ? [true] : []
+        content {
+          dynamic "sse_kms_encrypted_objects" {
+            for_each = [source_selection_criteria.key]
+            content {
+              enabled = sse_kms_encrypted_objects.key
+            }
+          }
+        }
+      }
 
       destination {
-        bucket        = aws_s3_bucket.replica[count.index].arn
-        storage_class = "STANDARD_IA"
-        # replica_kms_key_id = aws_kms_key.replica[count.index].arn
+        bucket             = aws_s3_bucket.replica[count.index].arn
+        storage_class      = "STANDARD_IA"
+        replica_kms_key_id = var.kms_replica_key_arn
       }
     }
   }

@@ -46,10 +46,8 @@ resource "aws_s3_bucket" "replica" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-        # # var.enable_kms ? : ==> join("", ...)
-        # sse_algorithm     = var.enable ? "aws:kms" : "AES256"
-        # kms_master_key_id = join("", aws_kms_key.replica.*.arn)
+        sse_algorithm     = var.kms_replica_key_arn != null ? "aws:kms" : "AES256"
+        kms_master_key_id = var.kms_replica_key_arn
       }
     }
   }
