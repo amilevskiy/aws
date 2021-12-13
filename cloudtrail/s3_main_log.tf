@@ -61,9 +61,9 @@ resource "aws_s3_bucket" "main_log" {
         for_each = var.kms_main_key_arn != null ? [true] : []
         content {
           dynamic "sse_kms_encrypted_objects" {
-            for_each = [source_selection_criteria.key]
+            for_each = [source_selection_criteria.value]
             content {
-              enabled = sse_kms_encrypted_objects.key
+              enabled = sse_kms_encrypted_objects.value
             }
           }
         }
