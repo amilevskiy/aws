@@ -124,29 +124,6 @@ data "aws_iam_policy_document" "main" {
   #####################################
   count = local.enable
 
-  # dynamic "statement" {
-  #   for_each = var.s3_bucket_allowed_services != null ? [var.s3_bucket_allowed_services] : []
-  #   content {
-  #     sid = "AllowBucketAclCheckAndList"
-  #     actions = [
-  #       "s3:GetBucketAcl",
-  #       "s3:ListBucket",
-  #     ]
-  #     resources = aws_s3_bucket.main.*.arn
-
-  #     principals {
-  #       type        = "Service"
-  #       identifiers = statement.key
-  #     }
-
-  #     condition {
-  #       test     = "Bool"
-  #       variable = "aws:SecureTransport"
-  #       values   = [true]
-  #     }
-  #   }
-  # }
-
   #https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy.html#granting-access-in-another-account
   statement {
     sid = "AllowBucketAclCheckAndList"
