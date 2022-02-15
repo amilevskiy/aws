@@ -33,7 +33,7 @@ locals {
   ] : [] : []
 }
 
-#https://www.terraform.io/docs/providers/aws/r/security_group.html
+#https://www.terraform.io/docs/providers/aws/r/security_group
 resource "aws_security_group" "this" {
   ####################################
   count = local.enable_sg

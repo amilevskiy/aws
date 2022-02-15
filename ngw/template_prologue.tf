@@ -16,7 +16,7 @@
 # %{ > %%{
 # $$$$( $$(
 #
-#https://www.terraform.io/docs/providers/template/d/file.html
+#https://www.terraform.io/docs/providers/template/d/file
 data "template_file" "prologue" {
   ###############################
   count = local.enable

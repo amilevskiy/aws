@@ -61,7 +61,7 @@ locals {
   : [] : [])
 }
 
-#https://www.terraform.io/docs/providers/aws/r/security_group.html
+#https://www.terraform.io/docs/providers/aws/r/security_group
 resource "aws_security_group" "this" {
   ####################################
   count = local.enable_sg
@@ -138,7 +138,7 @@ resource "aws_security_group" "this" {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/security_group_rule.html
+#https://www.terraform.io/docs/providers/aws/r/security_group_rule
 resource "aws_security_group_rule" "this" {
   #########################################
   for_each = local.security_group_rules

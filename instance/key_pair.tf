@@ -4,7 +4,7 @@ locals {
   ) ? var.instance.public_key != "" ? 1 : 0 : 0 : 0
 }
 
-#https://www.terraform.io/docs/providers/aws/r/key_pair.html
+#https://www.terraform.io/docs/providers/aws/r/key_pair
 resource "aws_key_pair" "this" {
   ##############################
   count = local.enable_key_pair

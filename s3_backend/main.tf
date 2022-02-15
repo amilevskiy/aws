@@ -6,7 +6,7 @@ module "const" {
   source = "github.com/amilevskiy/const?ref=v0.1.11"
 }
 
-#https://www.terraform.io/docs/providers/null/resource.html
+#https://www.terraform.io/docs/providers/null/resource
 resource "null_resource" "backend" {
   ##################################
   count = local.enable

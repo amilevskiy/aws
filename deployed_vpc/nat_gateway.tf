@@ -41,7 +41,7 @@ locals {
 }
 
 
-#https://www.terraform.io/docs/providers/aws/r/eip.html
+#https://www.terraform.io/docs/providers/aws/r/eip
 resource "aws_eip" "this" {
   #########################
   count = local.enable_nat_gateway
@@ -74,7 +74,7 @@ resource "aws_eip" "this" {
   depends_on = [aws_internet_gateway.this]
 }
 
-#https://www.terraform.io/docs/providers/aws/r/nat_gateway.html
+#https://www.terraform.io/docs/providers/aws/r/nat_gateway
 resource "aws_nat_gateway" "this" {
   #################################
   count = local.enable_nat_gateway
@@ -109,7 +109,7 @@ resource "aws_nat_gateway" "this" {
   })
 }
 
-# #https://www.terraform.io/docs/providers/random/r/shuffle.html
+##https://www.terraform.io/docs/providers/random/r/shuffle
 # resource "random_shuffle" "this" {
 #   ################################
 #   count = local.enable_nat_gateway

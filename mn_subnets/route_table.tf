@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/providers/aws/r/route_table.html
+#https://www.terraform.io/docs/providers/aws/r/route_table
 resource "aws_route_table" "this" {
   #################################
   count = local.enable_route_table
@@ -15,7 +15,7 @@ resource "aws_route_table" "this" {
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/r/route_table_association.html
+#https://www.terraform.io/docs/providers/aws/r/route_table_association
 resource "aws_route_table_association" "this" {
   #############################################
   for_each = local.enable_route_table > 0 ? aws_subnet.this : {}
@@ -24,7 +24,7 @@ resource "aws_route_table_association" "this" {
   route_table_id = aws_route_table.this[0].id
 }
 
-#https://www.terraform.io/docs/providers/aws/r/vpc_endpoint_route_table_association.html
+#https://www.terraform.io/docs/providers/aws/r/vpc_endpoint_route_table_association
 resource "aws_vpc_endpoint_route_table_association" "this" {
   ##########################################################
   for_each = local.enable_route_table > 0 && var.vpc_endpoint_type_gateway_ids != null ? var.vpc_endpoint_type_gateway_ids : {}
@@ -35,7 +35,7 @@ resource "aws_vpc_endpoint_route_table_association" "this" {
 
 
 
-#https://www.terraform.io/docs/providers/aws/r/route.html
+#https://www.terraform.io/docs/providers/aws/r/route
 resource "aws_route" "this" {
   ###########################
   for_each = local.routes
@@ -49,7 +49,10 @@ resource "aws_route" "this" {
   carrier_gateway_id        = can(regex("^cagw-", each.value)) ? each.value : null
   egress_only_gateway_id    = can(regex("^eigw-", each.value)) ? each.value : null
   gateway_id                = can(regex("^igw-", each.value)) ? each.value : null
-  instance_id               = can(regex("^i-", each.value)) ? each.value : null
+
+  #Deprecated started from terraform-provider-aws ~v4.0.0 - use network_interface_id instead
+  #instance_id               = can(regex("^i-", each.value)) ? each.value : null
+
   local_gateway_id          = can(regex("^lgw-", each.value)) ? each.value : null
   nat_gateway_id            = can(regex("^nat-", each.value)) ? each.value : null
   network_interface_id      = can(regex("^eni-", each.value)) ? each.value : null

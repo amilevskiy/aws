@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/providers/aws/d/ec2_transit_gateway.html
+#https://www.terraform.io/docs/providers/aws/d/ec2_transit_gateway
 data "aws_ec2_transit_gateway" "leader" {
   #######################################
   provider = aws.leader
@@ -8,7 +8,7 @@ data "aws_ec2_transit_gateway" "leader" {
   id = var.leader_tgw_id
 }
 
-#https://www.terraform.io/docs/providers/aws/d/caller_identity.html
+#https://www.terraform.io/docs/providers/aws/d/caller_identity
 data "aws_caller_identity" "follower" {
   #####################################
   provider = aws.follower
@@ -17,7 +17,7 @@ data "aws_caller_identity" "follower" {
 }
 
 
-#https://www.terraform.io/docs/configuration/locals.html
+#https://www.terraform.io/docs/configuration/locals
 locals {
   ######
 

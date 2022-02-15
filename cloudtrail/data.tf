@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/providers/aws/d/caller_identity.html
+#https://www.terraform.io/docs/providers/aws/d/caller_identity
 data "aws_caller_identity" "this" {
   #################################
   provider = aws.main
@@ -6,7 +6,7 @@ data "aws_caller_identity" "this" {
   count = var.account_id == "" ? local.enable : 0
 }
 
-#https://www.terraform.io/docs/providers/aws/d/region.html
+#https://www.terraform.io/docs/providers/aws/d/region
 data "aws_region" "main" {
   ########################
   provider = aws.main
@@ -14,7 +14,7 @@ data "aws_region" "main" {
   count = local.enable
 }
 
-#https://www.terraform.io/docs/providers/aws/d/region.html
+#https://www.terraform.io/docs/providers/aws/d/region
 data "aws_region" "replica" {
   ###########################
   provider = aws.replica
@@ -23,7 +23,7 @@ data "aws_region" "replica" {
 }
 
 
-#https://www.terraform.io/docs/configuration/locals.html
+#https://www.terraform.io/docs/configuration/locals
 locals {
   ######
 

@@ -28,7 +28,7 @@ locals {
   ) ? var.transit_gateway.static_routes : {} : {}
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway.html
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway
 resource "aws_ec2_transit_gateway" "this" {
   #########################################
   count = local.enable
@@ -65,7 +65,7 @@ resource "aws_ec2_transit_gateway" "this" {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route.html
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route
 resource "aws_ec2_transit_gateway_route" "this" {
   ###############################################
   for_each = local.transit_gateway_static_routes

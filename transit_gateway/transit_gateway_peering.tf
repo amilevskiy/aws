@@ -26,7 +26,7 @@ locals {
   ) ? var.transit_gateway_peering.static_routes != null ? var.transit_gateway_peering.static_routes : {} : {} : {}
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_peering_attachment.html
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_peering_attachment
 resource "aws_ec2_transit_gateway_peering_attachment" "this" {
   ############################################################
   count = local.enable_transit_gateway_peering
@@ -42,7 +42,7 @@ resource "aws_ec2_transit_gateway_peering_attachment" "this" {
 
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_peering_attachment_accepter.html
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_peering_attachment_accepter
 resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
   #####################################################################
   provider = aws.peer
@@ -56,7 +56,7 @@ resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route.html
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route
 resource "aws_ec2_transit_gateway_route" "peer" {
   ###############################################
   provider = aws.peer

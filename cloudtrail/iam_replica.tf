@@ -8,7 +8,7 @@ locals {
   ])
 }
 
-#https://www.terraform.io/docs/providers/aws/r/iam_role.html
+#https://www.terraform.io/docs/providers/aws/r/iam_role
 resource "aws_iam_role" "replica" {
   #################################
   provider = aws.main
@@ -36,7 +36,7 @@ resource "aws_iam_role" "replica" {
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/r/iam_role_policy_attachment.html
+#https://www.terraform.io/docs/providers/aws/r/iam_role_policy_attachment
 resource "aws_iam_role_policy_attachment" "replica" {
   ###################################################
   provider = aws.main
@@ -47,7 +47,7 @@ resource "aws_iam_role_policy_attachment" "replica" {
   policy_arn = aws_iam_policy.replica[count.index].arn
 }
 
-#https://www.terraform.io/docs/providers/aws/r/iam_policy.html
+#https://www.terraform.io/docs/providers/aws/r/iam_policy
 resource "aws_iam_policy" "replica" {
   ###################################
   provider = aws.main
@@ -68,12 +68,12 @@ resource "aws_iam_policy" "replica" {
 #This policy defines some actions, resources, or conditions that do not provide permissions. To grant access, policies must have an action that has an applicable resource or condition.
 #И напротив KMS уточняет: One or more conditions do not have an applicable action.
 #https://docs.aws.amazon.com/AmazonS3/latest/dev/setting-repl-config-perm-overview.html
-#https://www.terraform.io/docs/providers/aws/d/iam_policy_document.html
+#https://www.terraform.io/docs/providers/aws/d/iam_policy_document
 data "aws_iam_policy_document" "replica" {
   ########################################
   count = local.enable
 
-  # https://docs.aws.amazon.com/AmazonS3/latest/dev/list_amazons3.html
+#https://docs.aws.amazon.com/AmazonS3/latest/dev/list_amazons3
   statement {
     sid = "AllowSourceGetConfiguration"
 
@@ -110,7 +110,7 @@ data "aws_iam_policy_document" "replica" {
     resources = formatlist("%s/*", aws_s3_bucket.replica.*.arn)
   }
 
-  # https://docs.aws.amazon.com/AmazonS3/latest/dev/replication-config-for-kms-objects.html
+#https://docs.aws.amazon.com/AmazonS3/latest/dev/replication-config-for-kms-objects
   dynamic "statement" {
     for_each = var.kms_main_key_arn != null ? [var.kms_main_key_arn] : []
     content {

@@ -1,16 +1,16 @@
-#https://www.terraform.io/docs/providers/aws/d/caller_identity.html
+#https://www.terraform.io/docs/providers/aws/d/caller_identity
 data "aws_caller_identity" "this" {
   #################################
   count = local.is_path_match ? 0 : local.enable
 }
 
-#https://www.terraform.io/docs/providers/aws/d/region.html
+#https://www.terraform.io/docs/providers/aws/d/region
 data "aws_region" "this" {
   ########################
   count = local.is_path_match ? 0 : local.enable
 }
 
-#https://www.terraform.io/docs/language/state/remote-state-data.html
+#https://www.terraform.io/docs/language/state/remote-state-data
 data "terraform_remote_state" "this" {
   ####################################
   count = local.enable
@@ -20,7 +20,7 @@ data "terraform_remote_state" "this" {
   config = local.config
 }
 
-#https://www.terraform.io/docs/providers/template/d/file.html
+#https://www.terraform.io/docs/providers/template/d/file
 data "template_file" "this" {
   ###########################
   count = local.enable
@@ -32,7 +32,7 @@ data "template_file" "this" {
   template = data.terraform_remote_state.this[count.index].outputs.backend_template
 }
 
-#https://www.terraform.io/docs/configuration/locals.html
+#https://www.terraform.io/docs/configuration/locals
 locals {
   ######
 

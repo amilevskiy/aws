@@ -19,7 +19,7 @@ locals {
   ) ? "${local.prefix}${module.const.delimiter}${module.const.key_pair_suffix}" : null : null
 }
 
-#https://www.terraform.io/docs/providers/aws/r/key_pair.html
+#https://www.terraform.io/docs/providers/aws/r/key_pair
 resource "aws_key_pair" "this" {
   ##############################
   count = local.enable_key_pair

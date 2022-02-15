@@ -42,7 +42,7 @@ variable "launch_template" {
     # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/elastic-graphics.html#elastic-gpus-basics
     elastic_gpu_type = optional(string)
 
-    # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-inference.html
+#https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-inference
     elastic_inference_accelerator_type = optional(string)
 
     iam_instance_profile = optional(object({
@@ -147,7 +147,7 @@ locals {
   ) ? "${local.prefix}${module.const.delimiter}${module.const.launch_template_suffix}" : null : null
 }
 
-#https://www.terraform.io/docs/providers/aws/r/launch_template.html
+#https://www.terraform.io/docs/providers/aws/r/launch_template
 resource "aws_launch_template" "this" {
   ###################################
   count = local.enable_launch_template

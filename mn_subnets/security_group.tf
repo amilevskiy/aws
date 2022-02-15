@@ -33,7 +33,7 @@ locals {
   security_group_rules = merge(local.inbound_sg_rules, local.outbound_sg_rules)
 }
 
-#https://www.terraform.io/docs/providers/aws/r/security_group.html
+#https://www.terraform.io/docs/providers/aws/r/security_group
 resource "aws_security_group" "this" {
   ####################################
   for_each = local.security_groups
@@ -96,7 +96,7 @@ resource "aws_security_group" "this" {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/security_group_rule.html
+#https://www.terraform.io/docs/providers/aws/r/security_group_rule
 resource "aws_security_group_rule" "this" {
   #########################################
   for_each = local.security_group_rules

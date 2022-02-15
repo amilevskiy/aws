@@ -17,7 +17,7 @@ locals {
   )
 }
 
-#https://www.terraform.io/docs/providers/random/r/shuffle.html
+#https://www.terraform.io/docs/providers/random/r/shuffle
 resource "random_shuffle" "this" {
   ################################
   count = var.enable && var.instance != null ? var.instance.subnet_id == null ? 1 : 0 : 0
@@ -26,8 +26,8 @@ resource "random_shuffle" "this" {
   result_count = 1
 }
 
-#https://www.terraform.io/docs/providers/aws/r/instance.html
-#https://www.terraform.io/docs/providers/aws/r/spot_instance_request.html
+#https://www.terraform.io/docs/providers/aws/r/instance
+#https://www.terraform.io/docs/providers/aws/r/spot_instance_request
 resource "aws_spot_instance_request" "this" {
   ###########################################
   count = local.enable_spot

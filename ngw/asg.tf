@@ -119,7 +119,7 @@ locals {
   ) ? "${local.prefix}${module.const.delimiter}${module.const.asg_suffix}" : null : null
 }
 
-#https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html
+#https://www.terraform.io/docs/providers/aws/r/autoscaling_group
 resource "aws_autoscaling_group" "this" {
   #######################################
   count = local.enable_autoscaling_group

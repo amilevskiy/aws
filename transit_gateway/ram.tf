@@ -31,7 +31,7 @@ locals {
   : [] : [])
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ram_resource_share.html
+#https://www.terraform.io/docs/providers/aws/r/ram_resource_share
 resource "aws_ram_resource_share" "this" {
   ########################################
   count = local.enable_resource_share
@@ -50,7 +50,7 @@ resource "aws_ram_resource_share" "this" {
 }
 
 # Share the transit gateway...
-#https://www.terraform.io/docs/providers/aws/r/ram_resource_association.html
+#https://www.terraform.io/docs/providers/aws/r/ram_resource_association
 resource "aws_ram_resource_association" "this" {
   ##############################################
   count = local.enable_resource_share
@@ -61,7 +61,7 @@ resource "aws_ram_resource_association" "this" {
 }
 
 
-#https://www.terraform.io/docs/providers/aws/r/ram_principal_association.html
+#https://www.terraform.io/docs/providers/aws/r/ram_principal_association
 resource "aws_ram_principal_association" "this" {
   ###############################################
   for_each = local.follower_principals
@@ -70,7 +70,7 @@ resource "aws_ram_principal_association" "this" {
   resource_share_arn = aws_ram_resource_share.this[0].arn
 }
 
-#https://www.terraform.io/docs/providers/template/d/file.html
+#https://www.terraform.io/docs/providers/template/d/file
 data "template_file" "this" {
   ###########################
   for_each = local.follower_principals
@@ -85,7 +85,7 @@ data "template_file" "this" {
     )
   }
 
-  #https://www.terraform.io/docs/providers/aws/r/ram_resource_share_accepter.html
+#https://www.terraform.io/docs/providers/aws/r/ram_resource_share_accepter
   template = <<-TEMPLATE
 resource "aws_ram_resource_share_accepter" "$${resource_id}" {
   provider = $${provider}

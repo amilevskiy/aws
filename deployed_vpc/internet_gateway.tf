@@ -16,7 +16,7 @@ locals {
   ) : null
 }
 
-#https://www.terraform.io/docs/providers/aws/r/internet_gateway.html
+#https://www.terraform.io/docs/providers/aws/r/internet_gateway
 resource "aws_internet_gateway" "this" {
   ######################################
   count = local.enable_internet_gateway

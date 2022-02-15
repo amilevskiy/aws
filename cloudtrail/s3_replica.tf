@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/configuration/locals.html
+#https://www.terraform.io/docs/configuration/locals
 locals {
   ######
   replica_bucket = join(module.const.delimiter, [coalesce(var.name, join(module.const.delimiter, concat(
@@ -8,7 +8,7 @@ locals {
   )))])
 }
 
-#https://www.terraform.io/docs/providers/aws/r/s3_bucket_public_access_block.html
+#https://www.terraform.io/docs/providers/aws/r/s3_bucket_public_access_block
 resource "aws_s3_bucket_public_access_block" "replica" {
   ######################################################
   provider = aws.replica
@@ -23,7 +23,7 @@ resource "aws_s3_bucket_public_access_block" "replica" {
   restrict_public_buckets = true
 }
 
-#https://www.terraform.io/docs/providers/aws/r/s3_bucket.html
+#https://www.terraform.io/docs/providers/aws/r/s3_bucket
 resource "aws_s3_bucket" "replica" {
   ##################################
   provider = aws.replica
@@ -72,7 +72,7 @@ resource "aws_s3_bucket" "replica" {
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/r/s3_bucket_policy.html
+#https://www.terraform.io/docs/providers/aws/r/s3_bucket_policy
 resource "aws_s3_bucket_policy" "replica" {
   #########################################
   provider = aws.replica
@@ -85,7 +85,7 @@ resource "aws_s3_bucket_policy" "replica" {
   depends_on = [aws_s3_bucket_public_access_block.replica]
 }
 
-#https://www.terraform.io/docs/providers/aws/d/iam_policy_document.html
+#https://www.terraform.io/docs/providers/aws/d/iam_policy_document
 data "aws_iam_policy_document" "s3_replica" {
   ###########################################
   count = local.enable

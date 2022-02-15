@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/providers/aws/r/kms_key.html
+#https://www.terraform.io/docs/providers/aws/r/kms_key
 resource "aws_kms_key" "this" {
   #############################
   count = local.enable
@@ -22,7 +22,7 @@ resource "aws_kms_key" "this" {
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/r/kms_alias.html
+#https://www.terraform.io/docs/providers/aws/r/kms_alias
 resource "aws_kms_alias" "main" {
   ###############################
   count = can(coalesce(var.name_prefix)) ? local.enable : 0
@@ -31,7 +31,7 @@ resource "aws_kms_alias" "main" {
   target_key_id = aws_kms_key.this[count.index].id
 }
 
-#https://www.terraform.io/docs/providers/aws/r/kms_replica_key.html
+#https://www.terraform.io/docs/providers/aws/r/kms_replica_key
 resource "aws_kms_replica_key" "this" {
   #####################################
   provider = aws.replica
@@ -52,7 +52,7 @@ resource "aws_kms_replica_key" "this" {
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/r/kms_alias.html
+#https://www.terraform.io/docs/providers/aws/r/kms_alias
 resource "aws_kms_alias" "replica" {
   ##################################
   provider = aws.replica

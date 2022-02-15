@@ -52,7 +52,7 @@ No requirements.
 | Name | Description |
 |------|-------------|
 | <a name="output_config"></a> [config](#output\_config) | ################ |
-| <a name="output_enable"></a> [enable](#output\_enable) | https://www.terraform.io/docs/configuration/outputs.html ################ |
+| <a name="output_enable"></a> [enable](#output\_enable) | https://www.terraform.io/docs/configuration/outputs ################ |
 | <a name="output_key_suffix"></a> [key\_suffix](#output\_key\_suffix) | #################### |
 | <a name="output_local_file"></a> [local\_file](#output\_local\_file) | #################### |
 <!-- END_TF_DOCS -->

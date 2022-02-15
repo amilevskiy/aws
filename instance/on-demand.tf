@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/providers/aws/r/instance.html
+#https://www.terraform.io/docs/providers/aws/r/instance
 resource "aws_instance" "this" {
   ##############################
   count = local.enable_on_demand

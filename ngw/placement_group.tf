@@ -30,7 +30,7 @@ locals {
   ) : "spread" : null
 }
 
-#https://www.terraform.io/docs/providers/aws/r/placement_group.html
+#https://www.terraform.io/docs/providers/aws/r/placement_group
 resource "aws_placement_group" "this" {
   #####################################
   count = local.placement_group

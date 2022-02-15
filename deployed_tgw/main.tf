@@ -4,7 +4,7 @@ module "const" {
   source = "github.com/amilevskiy/const?ref=v0.1.11"
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ram_resource_share.html
+#https://www.terraform.io/docs/providers/aws/r/ram_resource_share
 resource "aws_ram_resource_share" "leader" {
   ##########################################
   provider = aws.leader
@@ -31,7 +31,7 @@ resource "aws_ram_resource_share" "leader" {
 }
 
 # Share the transit gateway...
-#https://www.terraform.io/docs/providers/aws/r/ram_resource_association.html
+#https://www.terraform.io/docs/providers/aws/r/ram_resource_association
 resource "aws_ram_resource_association" "leader" {
   ################################################
   provider = aws.leader
@@ -43,7 +43,7 @@ resource "aws_ram_resource_association" "leader" {
   resource_share_arn = aws_ram_resource_share.leader[0].arn
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ram_principal_association.html
+#https://www.terraform.io/docs/providers/aws/r/ram_principal_association
 resource "aws_ram_principal_association" "leader" {
   #################################################
   provider = aws.leader
@@ -54,7 +54,7 @@ resource "aws_ram_principal_association" "leader" {
   resource_share_arn = aws_ram_resource_share.leader[0].arn
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route.html
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route
 resource "aws_ec2_transit_gateway_route" "this" {
   ################################################
   provider = aws.leader
@@ -67,7 +67,7 @@ resource "aws_ec2_transit_gateway_route" "this" {
 }
 
 
-#https://www.terraform.io/docs/providers/aws/r/ram_resource_share_accepter.html
+#https://www.terraform.io/docs/providers/aws/r/ram_resource_share_accepter
 resource "aws_ram_resource_share_accepter" "follower" {
   #####################################################
   provider = aws.follower

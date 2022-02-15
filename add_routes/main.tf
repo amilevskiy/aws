@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/providers/aws/d/route_tables.html
+#https://www.terraform.io/docs/providers/aws/d/route_tables
 ##################################
 data "aws_route_tables" "theese" {
   ################################
@@ -7,7 +7,7 @@ data "aws_route_tables" "theese" {
   vpc_id = var.vpc_ids[count.index]
 }
 
-#https://www.terraform.io/docs/providers/aws/r/route.html
+#https://www.terraform.io/docs/providers/aws/r/route
 resource "aws_route" "this" {
   ###########################
   for_each = toset(var.enable ? [

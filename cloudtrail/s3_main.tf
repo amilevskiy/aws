@@ -7,7 +7,7 @@ locals {
 
 }
 
-#https://www.terraform.io/docs/providers/aws/r/s3_bucket_public_access_block.html
+#https://www.terraform.io/docs/providers/aws/r/s3_bucket_public_access_block
 resource "aws_s3_bucket_public_access_block" "main" {
   ###################################################
   provider = aws.main
@@ -22,7 +22,7 @@ resource "aws_s3_bucket_public_access_block" "main" {
   restrict_public_buckets = true
 }
 
-#https://www.terraform.io/docs/providers/aws/r/s3_bucket.html
+#https://www.terraform.io/docs/providers/aws/r/s3_bucket
 resource "aws_s3_bucket" "main" {
   ###############################
   provider = aws.main
@@ -106,7 +106,7 @@ resource "aws_s3_bucket" "main" {
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/r/s3_bucket_policy.html
+#https://www.terraform.io/docs/providers/aws/r/s3_bucket_policy
 resource "aws_s3_bucket_policy" "main" {
   ######################################
   provider = aws.main
@@ -119,7 +119,7 @@ resource "aws_s3_bucket_policy" "main" {
   depends_on = [aws_s3_bucket_public_access_block.main]
 }
 
-#https://www.terraform.io/docs/providers/aws/d/iam_policy_document.html
+#https://www.terraform.io/docs/providers/aws/d/iam_policy_document
 data "aws_iam_policy_document" "main" {
   #####################################
   count = local.enable

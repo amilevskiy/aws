@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/providers/aws/r/network_acl.html
+#https://www.terraform.io/docs/providers/aws/r/network_acl
 resource "aws_network_acl" "this" {
   #################################
   for_each = local.subnet_keys
@@ -50,7 +50,7 @@ resource "aws_network_acl" "this" {
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/r/network_acl_rule.html
+#https://www.terraform.io/docs/providers/aws/r/network_acl_rule
 resource "aws_network_acl_rule" "ingress" {
   #########################################
   for_each = var.enable_network_acl_rule_embedding ? {} : local.inbound_network_acls
@@ -70,7 +70,7 @@ resource "aws_network_acl_rule" "ingress" {
 }
 
 
-#https://www.terraform.io/docs/providers/aws/r/network_acl_rule.html
+#https://www.terraform.io/docs/providers/aws/r/network_acl_rule
 resource "aws_network_acl_rule" "egress" {
   ########################################
   for_each = var.enable_network_acl_rule_embedding ? {} : local.outbound_network_acls

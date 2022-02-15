@@ -53,7 +53,7 @@ locals {
   } : {} : {}
 }
 
-#https://www.terraform.io/docs/providers/aws/r/iam_role.html
+#https://www.terraform.io/docs/providers/aws/r/iam_role
 resource "aws_iam_role" "this" {
   ##############################
   count = local.enable_iam
@@ -93,7 +93,7 @@ resource "aws_iam_role" "this" {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/iam_instance_profile.html
+#https://www.terraform.io/docs/providers/aws/r/iam_instance_profile
 resource "aws_iam_instance_profile" "this" {
   ##########################################
   count = local.enable_iam
@@ -114,7 +114,7 @@ resource "aws_iam_instance_profile" "this" {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/iam_role_policy_attachment.html
+#https://www.terraform.io/docs/providers/aws/r/iam_role_policy_attachment
 resource "aws_iam_role_policy_attachment" "this" {
   ################################################
   for_each = local.iam_policy_arns

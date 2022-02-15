@@ -48,7 +48,7 @@ No requirements.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_enable"></a> [enable](#output\_enable) | https://www.terraform.io/docs/configuration/outputs.html ################ |
+| <a name="output_enable"></a> [enable](#output\_enable) | https://www.terraform.io/docs/configuration/outputs ################ |
 | <a name="output_env"></a> [env](#output\_env) | ############# |
 | <a name="output_name"></a> [name](#output\_name) | ############## |
 | <a name="output_principal_association"></a> [principal\_association](#output\_principal\_association) | ############################### |
