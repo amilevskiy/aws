@@ -1,3 +1,4 @@
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 No requirements.
@@ -88,3 +89,4 @@ No requirements.
 | <a name="output_vpc"></a> [vpc](#output\_vpc) | ############# |
 | <a name="output_vpc_endpoint"></a> [vpc\_endpoint](#output\_vpc\_endpoint) | ###################### |
 | <a name="output_vpc_endpoint_security_groups"></a> [vpc\_endpoint\_security\_groups](#output\_vpc\_endpoint\_security\_groups) | ###################################### |
+<!-- END_TF_DOCS -->

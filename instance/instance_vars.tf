@@ -119,7 +119,6 @@ variable "instance" {
   #     ) != null ? length(var.subnets.availability_zones) > 0 ? lookup(
   #     var.subnets, "availability_zone_ids", null
   #   ) != null ? length(var.subnets.availability_zone_ids) == 0 : true : true : true : true
-
   #   error_message = "The only possible values are \"availability_zones\" or \"availability_zone_ids\"."
   # }
 

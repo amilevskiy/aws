@@ -10,7 +10,6 @@ variable "iam" {
   default = null
 }
 
-
 locals {
   instance_name = var.enable && var.instance != null ? var.instance.name != null ? (
     var.instance.name
@@ -26,27 +25,33 @@ locals {
     var.iam.inline_policy_document != null
   ) ? var.iam.inline_policy_document : "" : ""
 
+  iam_inline_policy_document_sure = (local.iam_inline_policy_document != ""
+    ? local.iam_inline_policy_document
+    : jsonencode({
+      Version = module.const.policy_version
+      Statement : [{
+        Sid    = "NatInstancePermissions"
+        Effect = "Allow"
+        Action = [
+          "ec2:CreateRoute",
+          "ec2:DeleteRoute",
+          "ec2:Describe*",
+          "ec2:GetLaunchTemplateData",
+          "ec2:ModifyInstanceCreditSpecification",
+          "ec2:ModifyNetworkInterfaceAttribute",
+          "route53:GetHostedZone",
+          "route53:ListHostedZones",
+          "route53:ListHostedZonesByName",
+          "route53:ChangeResourceRecordSets",
+          "route53:ListResourceRecordSets"
+        ]
+        Resource = "*"
+  }] }))
+
   iam_policy_arns = local.enable_iam > 0 ? var.iam.policy_arns != null ? {
     for v in var.iam.policy_arns : replace(v, "/\\//", "") => v
   } : {} : {}
 }
-
-#https://www.terraform.io/docs/providers/aws/d/iam_policy_document.html
-data "aws_iam_policy_document" "assume" {
-  #######################################
-  count = local.enable_iam
-
-  statement {
-    sid     = "Ec2TrustRelationshipPolicy"
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
 
 #https://www.terraform.io/docs/providers/aws/r/iam_role.html
 resource "aws_iam_role" "this" {
@@ -60,7 +65,24 @@ resource "aws_iam_role" "this" {
 
   description = "Allows access to AWS resources for ${local.instance_name}-instance"
 
-  assume_role_policy = data.aws_iam_policy_document.assume[0].json
+  assume_role_policy = jsonencode({
+    Version = module.const.policy_version
+    Statement : [{
+      Sid    = "Ec2TrustRelationshipPolicy"
+      Effect = "Allow"
+      Action = "sts:AssumeRole"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      },
+  }] })
+
+  dynamic "inline_policy" {
+    for_each = local.iam_inline_policy_document_sure != "" ? [local.iam_inline_policy_document_sure] : []
+    content {
+      name   = join(module.const.delimiter, ["iamInlinePolicy", local.iam_name])
+      policy = inline_policy.value
+    }
+  }
 
   lifecycle {
     create_before_destroy = true
@@ -68,48 +90,6 @@ resource "aws_iam_role" "this" {
 
   tags = {
     Name = "${local.iam_name}${module.const.delimiter}${module.const.iam_role_suffix}"
-  }
-}
-
-#https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
-resource "aws_iam_role_policy" "this" {
-  #####################################
-  count = local.enable_iam
-
-  name_prefix = "${join(module.const.delimiter, [
-    "iamInlinePolicy",
-    local.iam_name,
-  ])}${module.const.delimiter}"
-
-  role = aws_iam_role.this[0].name
-
-  policy = try(data.aws_iam_policy_document.inline[0].json, local.iam_inline_policy_document)
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-#https://www.terraform.io/docs/providers/aws/d/iam_policy_document.html
-data "aws_iam_policy_document" "inline" {
-  #######################################
-  count = local.enable_iam > 0 && local.iam_inline_policy_document == "" ? 1 : 0
-
-  statement {
-    actions = [
-      "ec2:CreateRoute",
-      "ec2:DeleteRoute",
-      "ec2:Describe*",
-      "ec2:GetLaunchTemplateData",
-      "ec2:ModifyInstanceCreditSpecification",
-      "ec2:ModifyNetworkInterfaceAttribute",
-      "route53:GetHostedZone",
-      "route53:ListHostedZones",
-      "route53:ListHostedZonesByName",
-      "route53:ChangeResourceRecordSets",
-      "route53:ListResourceRecordSets"
-    ]
-    resources = ["*"]
   }
 }
 
