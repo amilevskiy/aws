@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/providers/aws/r/network_acl.html
+#https://www.terraform.io/docs/providers/aws/r/network_acl
 resource "aws_network_acl" "this" {
   #################################
   for_each = toset(local.subnets_order)
@@ -25,7 +25,7 @@ resource "aws_network_acl" "this" {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/network_acl_rule.html
+#https://www.terraform.io/docs/providers/aws/r/network_acl_rule
 resource "aws_network_acl_rule" "ingress" {
   #########################################
   for_each = toset(local.subnets_order)
@@ -43,7 +43,7 @@ resource "aws_network_acl_rule" "ingress" {
   ) : module.const.cidr_any
 }
 
-#https://www.terraform.io/docs/providers/aws/r/network_acl_rule.html
+#https://www.terraform.io/docs/providers/aws/r/network_acl_rule
 resource "aws_network_acl_rule" "egress" {
   ########################################
   for_each = toset(local.subnets_order)

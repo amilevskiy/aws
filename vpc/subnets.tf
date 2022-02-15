@@ -158,6 +158,8 @@ variable "subnets" {
   }
 
   default = null
+
+  description = "The object which describes \"aws_subnet\" resources"
 }
 
 

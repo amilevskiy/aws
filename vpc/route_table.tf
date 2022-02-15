@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/providers/aws/r/route_table.html
+#https://www.terraform.io/docs/providers/aws/r/route_table
 resource "aws_route_table" "this" {
   #################################
   for_each = toset(local.subnets_order)
@@ -25,7 +25,7 @@ resource "aws_route_table" "this" {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/route_table_association.html
+#https://www.terraform.io/docs/providers/aws/r/route_table_association
 resource "aws_route_table_association" "this" {
   #############################################
   for_each = aws_subnet.this
@@ -35,7 +35,7 @@ resource "aws_route_table_association" "this" {
 }
 
 
-#https://www.terraform.io/docs/providers/aws/r/route.html
+#https://www.terraform.io/docs/providers/aws/r/route
 resource "aws_route" "default_for_public" {
   #########################################
   count = local.enable_internet_gateway > 0 && contains(local.subnets_order, "public") ? 1 : 0
@@ -45,7 +45,7 @@ resource "aws_route" "default_for_public" {
   gateway_id             = aws_internet_gateway.this[0].id
 }
 
-#https://www.terraform.io/docs/providers/aws/r/route.html
+#https://www.terraform.io/docs/providers/aws/r/route
 resource "aws_route" "default_for_private" {
   ##########################################
   for_each = toset(local.enable_nat_gateway > 0 ? [
@@ -57,7 +57,7 @@ resource "aws_route" "default_for_private" {
   nat_gateway_id         = aws_nat_gateway.this[0].id
 }
 
-#https://www.terraform.io/docs/providers/aws/r/route.html
+#https://www.terraform.io/docs/providers/aws/r/route
 resource "aws_route" "transit_gateway" {
   ######################################
   for_each = local.vpc_routes

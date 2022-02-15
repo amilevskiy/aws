@@ -22,6 +22,8 @@ variable "vpc" {
   }
 
   default = null
+
+  description = "The object which describes \"aws_vpc\" resource"
 }
 
 locals {
@@ -36,7 +38,7 @@ locals {
   ])) : null
 }
 
-#https://www.terraform.io/docs/providers/aws/r/vpc.html
+#https://www.terraform.io/docs/providers/aws/r/vpc
 resource "aws_vpc" "this" {
   #########################
   count = local.enable_vpc

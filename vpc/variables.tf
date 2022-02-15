@@ -1,27 +1,27 @@
 variable "enable" {
   default     = false
-  description = "(Optional) Destroy all module resources if false"
+  description = "Destroy all module resources if false"
 }
 
 variable "env" {
   default     = ""
-  description = "(Optional) The name of target environment"
+  description = "The name of target environment"
 }
 
 variable "name" {
   default     = ""
-  description = "(Optional) The component of tag-name"
+  description = "The component of tag-name"
 }
 
 variable "tags" {
   type        = map(string)
   default     = {}
-  description = "(Optional) A mapping of tags which should be assigned to all module resources"
+  description = "A mapping of tags which should be assigned to all module resources"
 }
 
 variable "awscli_args" {
   default     = "no"
-  description = "(Optional) The AWS CLI arguments [e.g. --profile DEVOPS]"
+  description = "The AWS CLI arguments [e.g. --profile DEVOPS]"
 }
 
 variable "manage_default_vpc_dhcp_options" {
@@ -43,8 +43,9 @@ variable "label" {
 }
 
 variable "subnets_order" {
-  type    = list(string)
-  default = ["k8s", "misc", "public", "lb", "secured"]
+  type        = list(string)
+  default     = ["k8s", "misc", "public", "lb", "secured"]
+  description = "The order of subnets"
 }
 
 variable "hosts" {
@@ -56,11 +57,13 @@ variable "hosts" {
     misc    = 512
     secured = 16
   }
+  description = "The number of hosts in each subnet"
 }
 
 variable "max_ipv4_prefix" {
-  type    = number
-  default = 32
+  type        = number
+  default     = 32
+  description = "/32 for CIDR"
 }
 
 variable "bool2string" {
@@ -69,4 +72,5 @@ variable "bool2string" {
     true  = "enable"
     false = "disable"
   }
+  description = "The map for conversion from bool value to string representation"
 }

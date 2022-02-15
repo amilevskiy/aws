@@ -1,4 +1,4 @@
-#https://www.terraform.io/docs/providers/aws/r/subnet.html
+#https://www.terraform.io/docs/providers/aws/r/subnet
 resource "aws_subnet" "this" {
   ############################
   for_each = local.subnets

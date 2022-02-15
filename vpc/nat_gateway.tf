@@ -27,6 +27,8 @@ variable "nat_gateway" {
   }
 
   default = null
+
+  description = "The object which describes \"aws_nat_gateway\" resource"
 }
 
 
@@ -42,7 +44,7 @@ locals {
 }
 
 
-#https://www.terraform.io/docs/providers/aws/r/eip.html
+#https://www.terraform.io/docs/providers/aws/r/eip
 resource "aws_eip" "this" {
   #########################
   count = local.enable_nat_gateway
@@ -75,7 +77,7 @@ resource "aws_eip" "this" {
   depends_on = [aws_internet_gateway.this]
 }
 
-#https://www.terraform.io/docs/providers/aws/r/nat_gateway.html
+#https://www.terraform.io/docs/providers/aws/r/nat_gateway
 resource "aws_nat_gateway" "this" {
   #################################
   count = local.enable_nat_gateway
@@ -96,7 +98,7 @@ resource "aws_nat_gateway" "this" {
   })
 }
 
-#https://www.terraform.io/docs/providers/random/r/shuffle.html
+#https://www.terraform.io/docs/providers/random/r/shuffle
 resource "random_shuffle" "this" {
   ################################
   count = local.enable_nat_gateway
@@ -106,7 +108,7 @@ resource "random_shuffle" "this" {
   result_count = 1
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ec2_tag.html
+#https://www.terraform.io/docs/providers/aws/r/ec2_tag
 resource "aws_ec2_tag" "this" {
   #############################
   for_each = local.enable_nat_gateway > 0 ? merge(local.tags, {

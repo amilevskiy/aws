@@ -4,6 +4,8 @@ variable "internet_gateway" {
   })
 
   default = null
+
+  description = "The object which describes \"aws_internet_gateway\" resource"
 }
 
 locals {
@@ -17,7 +19,7 @@ locals {
   ])) : null
 }
 
-#https://www.terraform.io/docs/providers/aws/r/internet_gateway.html
+#https://www.terraform.io/docs/providers/aws/r/internet_gateway
 resource "aws_internet_gateway" "this" {
   ######################################
   count = local.enable_internet_gateway

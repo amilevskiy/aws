@@ -23,6 +23,8 @@ variable "dhcp_options" {
   }
 
   default = null
+
+  description = "The object which describes \"aws_vpc_dhcp_options\" resource"
 }
 
 
@@ -38,7 +40,7 @@ locals {
 }
 
 
-#https://www.terraform.io/docs/providers/aws/r/vpc_dhcp_options.html
+#https://www.terraform.io/docs/providers/aws/r/vpc_dhcp_options
 resource "aws_vpc_dhcp_options" "this" {
   ######################################
   count = local.enable_dhcp_options
@@ -82,7 +84,7 @@ resource "aws_vpc_dhcp_options" "this" {
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/r/vpc_dhcp_options_association.html
+#https://www.terraform.io/docs/providers/aws/r/vpc_dhcp_options_association
 resource "aws_vpc_dhcp_options_association" "this" {
   ##################################################
   count = local.enable_dhcp_options

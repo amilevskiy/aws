@@ -1,6 +1,6 @@
 # подходим формально: чистим и пусть висят
 
-#https://www.terraform.io/docs/providers/aws/r/default_vpc_dhcp_options.html
+#https://www.terraform.io/docs/providers/aws/r/default_vpc_dhcp_options
 resource "aws_default_vpc_dhcp_options" "this" {
   ##############################################
   count = var.enable && var.manage_default_vpc_dhcp_options ? 1 : 0
@@ -16,7 +16,7 @@ resource "aws_default_vpc_dhcp_options" "this" {
   })
 }
 
-#https://www.terraform.io/docs/providers/aws/r/default_route_table.html
+#https://www.terraform.io/docs/providers/aws/r/default_route_table
 resource "aws_default_route_table" "this" {
   #########################################
   count = local.enable_vpc
@@ -39,7 +39,7 @@ resource "aws_default_route_table" "this" {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/default_network_acl.html
+#https://www.terraform.io/docs/providers/aws/r/default_network_acl
 resource "aws_default_network_acl" "this" {
   #########################################
   count = local.enable_vpc
@@ -77,7 +77,7 @@ resource "aws_default_network_acl" "this" {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/default_security_group.html
+#https://www.terraform.io/docs/providers/aws/r/default_security_group
 resource "aws_default_security_group" "this" {
   ############################################
   count = local.enable_vpc

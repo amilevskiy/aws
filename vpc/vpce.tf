@@ -29,6 +29,8 @@ variable "vpc_endpoint" {
   })
 
   default = null
+
+  description = "The object which describes \"aws_vpc_endpoint\" resources"
 }
 
 locals {
@@ -78,14 +80,14 @@ locals {
 }
 
 
-#https://www.terraform.io/docs/providers/aws/d/region.html
+#https://www.terraform.io/docs/providers/aws/d/region
 data "aws_region" "this" {
   ########################
   count = local.enable_data_region
 }
 
-#https://www.terraform.io/docs/providers/aws/r/security_group.html
-resource "aws_security_group" "this" {
+#https://www.terraform.io/docs/providers/aws/r/security_group
+resource "aws_security_group" "vpce" {
   ####################################
   for_each = local.vpc_endpoint_security_groups
 
@@ -112,12 +114,12 @@ resource "aws_security_group" "this" {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/security_group_rule.html
-resource "aws_security_group_rule" "this" {
+#https://www.terraform.io/docs/providers/aws/r/security_group_rule
+resource "aws_security_group_rule" "vpce" {
   #########################################
   for_each = local.vpc_endpoint_security_groups
 
-  security_group_id = aws_security_group.this[each.key].id
+  security_group_id = aws_security_group.vpce[each.key].id
 
   type        = "ingress"
   protocol    = "-1"
@@ -133,7 +135,7 @@ resource "aws_security_group_rule" "this" {
 }
 
 
-#https://www.terraform.io/docs/providers/aws/r/vpc_endpoint.html
+#https://www.terraform.io/docs/providers/aws/r/vpc_endpoint
 resource "aws_vpc_endpoint" "this" {
   ##################################
   for_each = local.vpc_endpoints
@@ -165,7 +167,7 @@ resource "aws_vpc_endpoint" "this" {
   security_group_ids = (each.value.security_group_ids != null
     ? each.value.security_group_ids
     : coalesce(each.value.vpc_endpoint_type, "Gateway") == "Interface"
-    ? [aws_security_group.this[split(":", each.key)[0]].id]
+    ? [aws_security_group.vpce[split(":", each.key)[0]].id]
   : null) # Interface (required)
 
   tags = merge(local.tags, {
@@ -189,10 +191,10 @@ resource "aws_vpc_endpoint" "this" {
   #   ignore_changes = [route_table_ids, subnet_ids]
   # }
 
-  depends_on = [aws_security_group.this]
+  depends_on = [aws_security_group.vpce]
 }
 
-#https://www.terraform.io/docs/providers/aws/r/vpc_endpoint_route_table_association.html
+#https://www.terraform.io/docs/providers/aws/r/vpc_endpoint_route_table_association
 resource "aws_vpc_endpoint_route_table_association" "this" {
   ##########################################################
   for_each = local.vpc_endpoint_route_tables
@@ -202,7 +204,7 @@ resource "aws_vpc_endpoint_route_table_association" "this" {
 }
 
 
-#https://www.terraform.io/docs/providers/aws/r/vpc_endpoint_subnet_association.html
+#https://www.terraform.io/docs/providers/aws/r/vpc_endpoint_subnet_association
 resource "aws_vpc_endpoint_subnet_association" "this" {
   #####################################################
   for_each = local.vpc_endpoint_subnets

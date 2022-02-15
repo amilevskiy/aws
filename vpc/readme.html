@@ -123,7 +123,15 @@
 <td>resource</td>
 </tr>
 <tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group">aws_security_group.vpce</a></td>
+<td>resource</td>
+</tr>
+<tr>
 <td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule">aws_security_group_rule.this</a></td>
+<td>resource</td>
+</tr>
+<tr>
+<td><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule">aws_security_group_rule.vpce</a></td>
 <td>resource</td>
 </tr>
 <tr>
@@ -178,49 +186,56 @@
 <tbody>
 <tr>
 <td> <a href="#input_awscli_args">awscli_args</a></td>
-<td>(Optional) The AWS CLI arguments [e.g. --profile DEVOPS]</td>
+<td>The AWS CLI arguments [e.g. --profile DEVOPS]</td>
 <td><code>string</code></td>
 <td><code>&quot;no&quot;</code></td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_bool2string">bool2string</a></td>
-<td>n/a</td>
+<td>The map for conversion from bool value to string representation</td>
 <td><code>map(string)</code></td>
 <td>{ &quot;false&quot;: &quot;disable&quot;, &quot;true&quot;: &quot;enable&quot;}</td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_dhcp_options">dhcp_options</a></td>
-<td>n/a</td>
+<td>The object which describes &quot;aws_vpc_dhcp_options&quot; resource</td>
 <td>object({ name = optional(string) domain_name = optional(string) domain_name_servers = optional(list(string)) ntp_servers = optional(list(string)) netbios_name_servers = optional(list(string)) netbios_node_type = optional(number) })</td>
 <td><code>null</code></td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_enable">enable</a></td>
-<td>(Optional) Destroy all module resources if false</td>
+<td>Destroy all module resources if false</td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td align="center">no</td>
+</tr>
+<tr>
+<td> <a href="#input_enable_security_group_rule_embedding">enable_security_group_rule_embedding</a></td>
+<td>If true then rules will be embedded into &quot;aws_security_group&quot; resource</td>
 <td><code>bool</code></td>
 <td><code>false</code></td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_env">env</a></td>
-<td>(Optional) The name of target environment</td>
+<td>The name of target environment</td>
 <td><code>string</code></td>
 <td><code>&quot;&quot;</code></td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_hosts">hosts</a></td>
-<td>n/a</td>
+<td>The number of hosts in each subnet</td>
 <td><code>map(number)</code></td>
 <td>{ &quot;k8s&quot;: 1024, &quot;lb&quot;: 16, &quot;misc&quot;: 512, &quot;public&quot;: 32, &quot;secured&quot;: 16}</td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_internet_gateway">internet_gateway</a></td>
-<td>n/a</td>
+<td>The object which describes &quot;aws_internet_gateway&quot; resource</td>
 <td>object({ name = optional(string) })</td>
 <td><code>null</code></td>
 <td align="center">no</td>
@@ -241,56 +256,63 @@
 </tr>
 <tr>
 <td> <a href="#input_max_ipv4_prefix">max_ipv4_prefix</a></td>
-<td>n/a</td>
+<td>/32 for CIDR</td>
 <td><code>number</code></td>
 <td><code>32</code></td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_name">name</a></td>
-<td>(Optional) The component of tag-name</td>
+<td>The component of tag-name</td>
 <td><code>string</code></td>
 <td><code>&quot;&quot;</code></td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_nat_gateway">nat_gateway</a></td>
-<td>n/a</td>
+<td>The object which describes &quot;aws_nat_gateway&quot; resource</td>
 <td>object({ name_prefix = optional(string) allocation_id = optional(string) connectivity_type = optional(string) # private and public. Defaults to public. network_border_group = optional(string) subnet_index = optional(number) timeouts = optional(object({ read = optional(string) update = optional(string) delete = optional(string) })) })</td>
 <td><code>null</code></td>
 <td align="center">no</td>
 </tr>
 <tr>
+<td> <a href="#input_security_groups">security_groups</a></td>
+<td>The list of security group objects</td>
+<td>map(object({ description = optional(string) revoke_rules_on_delete = optional(bool) ingress = optional(list(string)) egress = optional(list(string)) }))</td>
+<td><code>null</code></td>
+<td align="center">no</td>
+</tr>
+<tr>
 <td> <a href="#input_subnets">subnets</a></td>
-<td>n/a</td>
+<td>The object which describes &quot;aws_subnet&quot; resources</td>
 <td>object({ name_prefix = optional(string) availability_zones = optional(list(string)) availability_zone_ids = optional(list(string)) map_public_ip_on_launch = optional(bool) # Default: false assign_ipv6_address_on_creation = optional(bool) # Default: false # intentionally omit support of the following due to lack of testing? map_customer_owned_ip_on_launch = optional(bool) # Default: false outpost_arn = optional(string) propagating_vgws = optional(list(string)) public = optional(object({ name_prefix = optional(string) hosts = optional(number) cidr_blocks = optional(list(string)) map_public_ip_on_launch = optional(bool) # Default: false assign_ipv6_address_on_creation = optional(bool) # Default: false ipv6_cidr_blocks = optional(list(string)) # /64 map_customer_owned_ip_on_launch = optional(bool) # Default: false customer_owned_ipv4_pool = optional(list(string)) outpost_arn = optional(string) propagating_vgws = optional(list(string)) tags = optional(map(string)) })) lb = optional(object({ name_prefix = optional(string) hosts = optional(number) cidr_blocks = optional(list(string)) map_public_ip_on_launch = optional(bool) # Default: false assign_ipv6_address_on_creation = optional(bool) # Default: false ipv6_cidr_blocks = optional(list(string)) # /64 map_customer_owned_ip_on_launch = optional(bool) # Default: false customer_owned_ipv4_pool = optional(list(string)) outpost_arn = optional(string) propagating_vgws = optional(list(string)) tags = optional(map(string)) })) k8s = optional(object({ name_prefix = optional(string) hosts = optional(number) cidr_blocks = optional(list(string)) map_public_ip_on_launch = optional(bool) # Default: false assign_ipv6_address_on_creation = optional(bool) # Default: false ipv6_cidr_blocks = optional(list(string)) # /64 map_customer_owned_ip_on_launch = optional(bool) # Default: false customer_owned_ipv4_pool = optional(list(string)) outpost_arn = optional(string) propagating_vgws = optional(list(string)) tags = optional(map(string)) })) misc = optional(object({ name_prefix = optional(string) hosts = optional(number) cidr_blocks = optional(list(string)) map_public_ip_on_launch = optional(bool) # Default: false assign_ipv6_address_on_creation = optional(bool) # Default: false ipv6_cidr_blocks = optional(list(string)) # /64 map_customer_owned_ip_on_launch = optional(bool) # Default: false customer_owned_ipv4_pool = optional(list(string)) outpost_arn = optional(string) propagating_vgws = optional(list(string)) tags = optional(map(string)) })) secured = optional(object({ name_prefix = optional(string) hosts = optional(number) cidr_blocks = optional(list(string)) map_public_ip_on_launch = optional(bool) # Default: false assign_ipv6_address_on_creation = optional(bool) # Default: false ipv6_cidr_blocks = optional(list(string)) # /64 map_customer_owned_ip_on_launch = optional(bool) # Default: false customer_owned_ipv4_pool = optional(list(string)) outpost_arn = optional(string) propagating_vgws = optional(list(string)) tags = optional(map(string)) # nice to do: network_acl_cidr_blocks = optional(list(string)) network_acl_cidr_block = optional(string) transit_gateway_vpc_attachments = optional(list(object({ name = optional(string) id = string # appliance_mode_support = optional(string) # Default: disable # dns_support = optional(string) # Default: enable # ipv6_support = optional(string) # Default: disable # transit_gateway_default_route_table_association = optional(bool) # Default: true # transit_gateway_default_route_table_propagation = optional(bool) # Default: true enable_appliance_mode_support = optional(bool) # Default: disable enable_dns_support = optional(bool) # Default: enable enable_ipv6_support = optional(bool) # Default: disable enable_default_route_table_association = optional(bool) # Default: true enable_default_route_table_propagation = optional(bool) # Default: true vpc_routes = optional(list(string)) association_default_route_table_id = optional(string) transit_gateway_static_routes = optional(list(string)) }))) })) timeouts = optional(object({ create = optional(string) delete = optional(string) })) })</td>
 <td><code>null</code></td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_subnets_order">subnets_order</a></td>
-<td>n/a</td>
+<td>The order of subnets</td>
 <td><code>list(string)</code></td>
 <td>[ &quot;k8s&quot;, &quot;misc&quot;, &quot;public&quot;, &quot;lb&quot;, &quot;secured&quot;]</td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_tags">tags</a></td>
-<td>(Optional) A mapping of tags which should be assigned to all module resources</td>
+<td>A mapping of tags which should be assigned to all module resources</td>
 <td><code>map(string)</code></td>
 <td><code>{}</code></td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_vpc">vpc</a></td>
-<td>n/a</td>
+<td>The object which describes &quot;aws_vpc&quot; resource</td>
 <td>object({ name = optional(string) cidr_block = string instance_tenancy = optional(string) # default, dedicated, host enable_dns_support = optional(bool) # Defaults true enable_dns_hostnames = optional(bool) # Defaults false enable_classiclink = optional(bool) # Defaults false enable_classiclink_dns_support = optional(bool) assign_generated_ipv6_cidr_block = optional(bool) # Defaults false })</td>
 <td><code>null</code></td>
 <td align="center">no</td>
 </tr>
 <tr>
 <td> <a href="#input_vpc_endpoint">vpc_endpoint</a></td>
-<td>n/a</td>
+<td>The object which describes &quot;aws_vpc_endpoint&quot; resources</td>
 <td>object({ name_prefix = optional(string) region = optional(string) enable_route_table_embedding = optional(bool) enable_subnet_embedding = optional(bool) services = optional(map(object({ name = optional(string) region = optional(string) auto_accept = optional(bool) policy = optional(string) private_dns_enabled = optional(bool) vpc_endpoint_type = optional(string) # Gateway, GatewayLoadBalancer, Interface security_group_ids = optional(set(string)) # Interface (required) }))) timeouts = optional(object({ create = optional(string) update = optional(string) delete = optional(string) })) })</td>
 <td><code>null</code></td>
 <td align="center">no</td>
@@ -308,55 +330,59 @@
 <tbody>
 <tr>
 <td> <a href="#output_availability_zone_ids">availability_zone_ids</a></td>
-<td>###############################</td>
+<td>The list of used availability zone ids</td>
 </tr>
 <tr>
 <td> <a href="#output_availability_zones">availability_zones</a></td>
-<td>############################</td>
+<td>The list of used availability zones</td>
 </tr>
 <tr>
 <td> <a href="#output_enable">enable</a></td>
-<td>################</td>
+<td>var.enable passthrough</td>
 </tr>
 <tr>
 <td> <a href="#output_env">env</a></td>
-<td>#############</td>
+<td>var.env passthrough</td>
 </tr>
 <tr>
 <td> <a href="#output_name">name</a></td>
-<td>##############</td>
+<td>var.name passthrough</td>
 </tr>
 <tr>
 <td> <a href="#output_nat_gateway">nat_gateway</a></td>
-<td>#####################</td>
+<td>The &quot;aws_nat_gateway&quot; object</td>
 </tr>
 <tr>
 <td> <a href="#output_network_acls">network_acls</a></td>
-<td>######################</td>
+<td>The map of &quot;aws_route_table&quot; objects</td>
 </tr>
 <tr>
 <td> <a href="#output_route_tables">route_tables</a></td>
-<td>######################</td>
+<td>The map of &quot;aws_route_table&quot; objects</td>
+</tr>
+<tr>
+<td> <a href="#output_security_groups">security_groups</a></td>
+<td>The map of &quot;aws_security_group&quot; objects</td>
 </tr>
 <tr>
 <td> <a href="#output_subnets">subnets</a></td>
-<td>#################</td>
+<td>The map of &quot;aws_subnet&quot; objects</td>
 </tr>
 <tr>
 <td> <a href="#output_transit_gateway_vpc_attachment">transit_gateway_vpc_attachment</a></td>
-<td>########################################</td>
+<td>The map of &quot;aws_ec2_transit_gateway_vpc_attachment&quot; objects</td>
 </tr>
 <tr>
 <td> <a href="#output_vpc">vpc</a></td>
-<td>#############</td>
+<td>The &quot;aws_vpc&quot; object</td>
 </tr>
 <tr>
 <td> <a href="#output_vpc_endpoint">vpc_endpoint</a></td>
-<td>######################</td>
+<td>The map of &quot;aws_vpc_endpoint&quot; objects</td>
 </tr>
 <tr>
 <td> <a href="#output_vpc_endpoint_security_groups">vpc_endpoint_security_groups</a></td>
-<td>######################################</td>
+<td>The map of &quot;aws_security_group&quot; objects that applied to appropriate &quot;aws_vpc_endpoint&quot; objects</td>
 </tr>
 </tbody>
 </table>

@@ -33,7 +33,7 @@ locals {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_vpc_attachment.html
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_vpc_attachment
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   ########################################################
   for_each = local.transit_gateway_vpc_attachments
@@ -75,7 +75,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   }
 }
 
-#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route.html
+#https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route
 resource "aws_ec2_transit_gateway_route" "this" {
   ###############################################
   for_each = local.transit_gateway_static_routes
